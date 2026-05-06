@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Page, SectionRecord, SectionType } from '@/cms/schema/sections';
+import { getDefaultSectionData } from '@/cms/schema/defaults';
 import { cms } from '@/cms/api';
 
 /**
@@ -75,14 +76,18 @@ export const usePageEditor = create<PageEditorState>((set, get) => ({
     set({ page: { ...page, ...patch }, dirty: true });
   },
 
-  addSection(type, defaultData = {}) {
+  addSection(type, defaultData) {
     const { page } = get();
     if (!page) return '';
     const newId = crypto.randomUUID();
+    // If no defaults were provided, seed with valid placeholder data so the
+    // section renders immediately without "invalid section data" errors.
+    const seed =
+      defaultData ?? (getDefaultSectionData(type) as Record<string, unknown>);
     const newSection: SectionRecord = {
       id: newId,
       type,
-      data: defaultData,
+      data: seed,
       visible: true,
       order: page.sections.length,
     };

@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import type { SectionRecord, SectionType, Page } from '@/cms/schema/sections';
 import { validateSection } from '@/cms/schema/sections';
+import { getDefaultSectionData } from '@/cms/schema/defaults';
 import {
   HeroRenderer,
   BannerRenderer,
@@ -61,9 +62,20 @@ export function SectionRenderer({ section, showHidden = false }: SectionRenderer
     );
   }
 
-  // Validate at render time. If invalid, show fallback in dev / nothing in prod
-  const result = validateSection(section.type, section.data);
+  // Validate at render time. If the saved data is incomplete (e.g. a fresh
+  // section the admin hasn't filled in yet), merge with defaults and try
+  // again. This keeps the editor experience smooth — admins see a working
+  // preview they can edit, not a "Invalid section data" wall.
+  let result = validateSection(section.type, section.data);
   if (!result.ok) {
+    const defaults = getDefaultSectionData(section.type) as Record<string, unknown>;
+    const merged = { ...defaults, ...(section.data as Record<string, unknown>) };
+    result = validateSection(section.type, merged);
+  }
+
+  if (!result.ok) {
+    // Merged data is *still* invalid — that's a real bug, not a missing field.
+    // Show it loudly in dev so it gets fixed; silently skip in prod.
     if (import.meta.env.DEV) {
       return (
         <div className="container-page py-8">
