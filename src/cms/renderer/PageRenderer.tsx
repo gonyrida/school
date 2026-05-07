@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import type { SectionRecord, SectionType, Page } from '@/cms/schema/sections';
 import { validateSection } from '@/cms/schema/sections';
 import { getDefaultSectionData } from '@/cms/schema/defaults';
+import { migrateSectionData } from '@/cms/schema/migrations';
 import {
   HeroRenderer,
   BannerRenderer,
@@ -15,6 +16,7 @@ import {
   FAQRenderer,
   VideoRenderer,
   TimelineRenderer,
+  EventsFeedRenderer,
 } from './sectionRenderers';
 
 /**
@@ -39,6 +41,7 @@ export const SECTION_COMPONENTS: Record<SectionType, ComponentType<{ data: any }
   faq: FAQRenderer,
   video: VideoRenderer,
   timeline: TimelineRenderer,
+  events_feed: EventsFeedRenderer,
 };
 
 interface SectionRendererProps {
@@ -62,14 +65,18 @@ export function SectionRenderer({ section, showHidden = false }: SectionRenderer
     );
   }
 
+  // Migrate old saved data to the current schema shape before validating.
+  // (e.g. gallery's `layout: 'grid-3'` was renamed to `'standard-grid'`.)
+  const migrated = migrateSectionData(section.type, section.data);
+
   // Validate at render time. If the saved data is incomplete (e.g. a fresh
   // section the admin hasn't filled in yet), merge with defaults and try
   // again. This keeps the editor experience smooth — admins see a working
   // preview they can edit, not a "Invalid section data" wall.
-  let result = validateSection(section.type, section.data);
+  let result = validateSection(section.type, migrated);
   if (!result.ok) {
     const defaults = getDefaultSectionData(section.type) as Record<string, unknown>;
-    const merged = { ...defaults, ...(section.data as Record<string, unknown>) };
+    const merged = { ...defaults, ...(migrated as Record<string, unknown>) };
     result = validateSection(section.type, merged);
   }
 

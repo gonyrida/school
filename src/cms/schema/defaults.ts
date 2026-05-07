@@ -4,9 +4,9 @@ import type { SectionType, SectionData } from './sections';
  * Default data for a brand-new section. Every value here must satisfy the
  * Zod schema for its type, so a freshly added section is immediately valid
  * and renders without errors.
- *
- * Admins can edit any of these placeholders right after adding the section.
  */
+
+const noBg = { type: 'none' as const, color: '' };
 
 export function getDefaultSectionData<T extends SectionType>(type: T): SectionData<T> {
   switch (type) {
@@ -18,6 +18,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         description: '',
         align: 'left',
         size: 'default',
+        background: noBg,
       } as SectionData<T>;
 
     case 'banner':
@@ -25,6 +26,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         title: 'New banner',
         description: '',
         theme: 'brand',
+        background: noBg,
       } as SectionData<T>;
 
     case 'rich_text':
@@ -32,6 +34,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         title: '',
         body: '<p>Start writing…</p>',
         maxWidth: 'normal',
+        background: noBg,
       } as SectionData<T>;
 
     case 'stats':
@@ -42,6 +45,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
           { id: crypto.randomUUID(), value: '20+', label: 'Teachers' },
           { id: crypto.randomUUID(), value: '15', label: 'Years' },
         ],
+        background: noBg,
       } as SectionData<T>;
 
     case 'cards':
@@ -50,19 +54,48 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         title: 'New card grid',
         description: '',
         layout: 'grid-3',
+        defaultTextAlign: 'left',
         cards: [
-          { id: crypto.randomUUID(), title: 'Card one', description: '' },
-          { id: crypto.randomUUID(), title: 'Card two', description: '' },
-          { id: crypto.randomUUID(), title: 'Card three', description: '' },
+          {
+            id: crypto.randomUUID(),
+            title: 'Card one',
+            description: 'Short description',
+            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
+            textAlign: 'left',
+            collapsibleDescription: false,
+            href: '',
+          },
+          {
+            id: crypto.randomUUID(),
+            title: 'Card two',
+            description: 'Short description',
+            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
+            textAlign: 'left',
+            collapsibleDescription: false,
+            href: '',
+          },
+          {
+            id: crypto.randomUUID(),
+            title: 'Card three',
+            description: 'Short description',
+            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
+            textAlign: 'left',
+            collapsibleDescription: false,
+            href: '',
+          },
         ],
+        background: noBg,
       } as SectionData<T>;
 
     case 'gallery':
       return {
         title: '',
         description: '',
-        layout: 'grid-3',
-        images: [{ url: '', alt: '' }],
+        layout: 'standard-grid',
+        columns: '3',
+        gap: 'md',
+        images: [],
+        background: noBg,
       } as SectionData<T>;
 
     case 'principal_message':
@@ -72,6 +105,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         role: 'Principal',
         message: '<p>Welcome to our school community…</p>',
         signature: '',
+        background: noBg,
       } as SectionData<T>;
 
     case 'cta':
@@ -79,6 +113,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         title: 'Ready to get started?',
         description: '',
         theme: 'brand',
+        background: noBg,
       } as SectionData<T>;
 
     case 'testimonials':
@@ -92,6 +127,7 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
             role: '',
           },
         ],
+        background: noBg,
       } as SectionData<T>;
 
     case 'faq':
@@ -104,29 +140,44 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
             answer: 'Our school day runs from 7:30 AM to 3:00 PM.',
           },
         ],
+        background: noBg,
       } as SectionData<T>;
 
     case 'video':
       return {
         title: '',
         description: '',
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        videoUrl: '',
+        background: noBg,
       } as SectionData<T>;
 
     case 'timeline':
       return {
-        title: 'How it works',
+        title: 'Timeline',
         description: '',
+        layout: 'zigzag',
         steps: [
-          { id: crypto.randomUUID(), title: 'Step one', description: '' },
-          { id: crypto.randomUUID(), title: 'Step two', description: '' },
-          { id: crypto.randomUUID(), title: 'Step three', description: '' },
+          { id: crypto.randomUUID(), title: 'Step one', description: 'Describe this step.' },
+          { id: crypto.randomUUID(), title: 'Step two', description: 'Describe this step.' },
+          { id: crypto.randomUUID(), title: 'Step three', description: 'Describe this step.' },
         ],
+        background: noBg,
+      } as SectionData<T>;
+
+    case 'events_feed':
+      return {
+        eyebrow: '',
+        title: 'Latest News & Events',
+        description: '',
+        limit: 3,
+        category: 'All',
+        layout: 'grid-3',
+        showViewAll: true,
+        viewAllLabel: 'View all events',
+        background: noBg,
       } as SectionData<T>;
 
     default: {
-      // Exhaustiveness check — TS will error if a new SectionType is added
-      // without a default here.
       const _exhaustive: never = type;
       void _exhaustive;
       return {} as SectionData<T>;

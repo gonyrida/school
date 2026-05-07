@@ -31,6 +31,7 @@ const ALL_SECTIONS: SectionType[] = [
   'faq',
   'video',
   'timeline',
+  'events_feed',
 ];
 
 export const PAGE_REGISTRY: PageDefinition[] = [
