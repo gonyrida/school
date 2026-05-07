@@ -8,6 +8,7 @@ import type {
   HeroSectionSchema,
   BannerSectionSchema,
   RichTextSectionSchema,
+  ImageTextSectionSchema,
   StatsSectionSchema,
   CardsSectionSchema,
   GallerySectionSchema,
@@ -28,6 +29,7 @@ import type { EventPost } from '@/cms/api';
 type Hero = z.infer<typeof HeroSectionSchema>;
 type Banner = z.infer<typeof BannerSectionSchema>;
 type RichText = z.infer<typeof RichTextSectionSchema>;
+type ImageText = z.infer<typeof ImageTextSectionSchema>;
 type Stats = z.infer<typeof StatsSectionSchema>;
 type Cards = z.infer<typeof CardsSectionSchema>;
 type Gallery = z.infer<typeof GallerySectionSchema>;
@@ -254,6 +256,93 @@ export function RichTextRenderer({ data }: { data: RichText }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Image + Text (side-by-side, swappable)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function ImageTextRenderer({ data }: { data: ImageText }) {
+  const shape = shapeClass(data.imageShape);
+  const verticalClass =
+    data.verticalAlign === 'top'
+      ? 'items-start'
+      : data.verticalAlign === 'bottom'
+        ? 'items-end'
+        : 'items-center';
+  const flipped = data.imagePosition === 'right';
+
+  const imageEl = (
+    <div className="w-full">
+      {data.image?.url ? (
+        <img
+          src={data.image.url}
+          alt={data.image.alt}
+          className={`aspect-[4/3] w-full object-cover ${shape}`}
+        />
+      ) : (
+        <ImageSlot className={`aspect-[4/3] w-full ${shape}`} rounded="rounded-none" />
+      )}
+    </div>
+  );
+
+  const textEl = (
+    <div className="flex flex-col">
+      {data.eyebrow && <p className="eyebrow text-brand-700">{data.eyebrow}</p>}
+      {data.title && (
+        <h2 className="section-title mt-2">{data.title}</h2>
+      )}
+      {data.body && (
+        <div
+          className="prose prose-ink mt-4 max-w-none prose-headings:font-display prose-a:text-brand-700"
+          dangerouslySetInnerHTML={{ __html: data.body }}
+        />
+      )}
+      {(data.primaryButton || data.secondaryButton) && (
+        <div className="mt-6 flex flex-wrap gap-3">
+          {data.primaryButton && data.primaryButton.label && (
+            <Link
+              to={data.primaryButton.href || '#'}
+              className={buttonClass(data.primaryButton.variant)}
+            >
+              {data.primaryButton.label}
+            </Link>
+          )}
+          {data.secondaryButton && data.secondaryButton.label && (
+            <Link
+              to={data.secondaryButton.href || '#'}
+              className={buttonClass(data.secondaryButton.variant)}
+            >
+              {data.secondaryButton.label}
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <SectionBg background={data.background}>
+      <section className="container-page py-12 md:py-20">
+        <motion.div
+          {...fadeUp}
+          className={`grid gap-8 md:gap-12 md:grid-cols-2 ${verticalClass}`}
+        >
+          {flipped ? (
+            <>
+              {textEl}
+              {imageEl}
+            </>
+          ) : (
+            <>
+              {imageEl}
+              {textEl}
+            </>
+          )}
+        </motion.div>
+      </section>
+    </SectionBg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Stats
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -313,20 +402,17 @@ function CardVisual({ visual }: { visual: CardItem['visual'] }) {
   if (!visual || visual.kind === 'none') return null;
 
   const shape = shapeClass(visual.shape);
-  // Sizing depends on whether the visual is alongside text or above it
-  const sizeClass =
-    visual.position === 'top'
-      ? 'aspect-[4/3] w-full'
-      : 'h-16 w-16 shrink-0';
+  const size = visual.size ?? 56;
+  const inlineSize = { width: `${size}px`, height: `${size}px` };
 
   if (visual.kind === 'image') {
     if (!visual.image?.url) return null;
     return (
-      <ImageSlot
+      <img
         src={visual.image.url}
         alt={visual.image.alt}
-        className={`${sizeClass} object-cover ${shape}`}
-        rounded="rounded-none"
+        className={`shrink-0 object-cover ${shape}`}
+        style={inlineSize}
       />
     );
   }
@@ -334,13 +420,14 @@ function CardVisual({ visual }: { visual: CardItem['visual'] }) {
   if (visual.kind === 'icon') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Icon = (Icons as any)[visual.iconName] ?? Icons.Square;
-    const wrap =
-      visual.position === 'top'
-        ? `flex h-20 w-20 items-center justify-center bg-brand-100 text-brand-700 ${shape}`
-        : `flex h-16 w-16 shrink-0 items-center justify-center bg-brand-100 text-brand-700 ${shape}`;
+    // Icon glyph scales relative to badge size (~50%), capped for legibility
+    const glyph = Math.max(16, Math.min(64, Math.round(size * 0.5)));
     return (
-      <div className={wrap}>
-        <Icon className={visual.position === 'top' ? 'h-10 w-10' : 'h-7 w-7'} />
+      <div
+        className={`flex shrink-0 items-center justify-center bg-brand-100 text-brand-700 ${shape}`}
+        style={inlineSize}
+      >
+        <Icon style={{ width: `${glyph}px`, height: `${glyph}px` }} />
       </div>
     );
   }
@@ -348,105 +435,161 @@ function CardVisual({ visual }: { visual: CardItem['visual'] }) {
   return null;
 }
 
-function CardItemRenderer({ card, defaultAlign }: { card: CardItem; defaultAlign: 'left' | 'center' | 'right' }) {
-  const align = card.textAlign ?? defaultAlign;
+/**
+ * Resolve a card's effective alignment.
+ * The card stores 'inherit' to mean "use the section's defaultTextAlign";
+ * any explicit value overrides.
+ */
+function resolveAlign(
+  cardAlign: CardItem['textAlign'],
+  sectionDefault: 'left' | 'center' | 'right',
+): 'left' | 'center' | 'right' {
+  if (!cardAlign || cardAlign === 'inherit') return sectionDefault;
+  return cardAlign;
+}
+
+function CardDescription({
+  card,
+  align,
+}: {
+  card: CardItem;
+  align: 'left' | 'center' | 'right';
+}) {
+  const [open, setOpen] = useState(!card.collapsibleDescription);
+
+  // Bulleted list mode
+  if (card.descriptionMode === 'list') {
+    const items = (card.descriptionList ?? []).filter((s) => s.trim().length > 0);
+    if (items.length === 0) return null;
+    const listAlign =
+      align === 'center'
+        ? 'mx-auto inline-block text-left'
+        : align === 'right'
+          ? 'ml-auto inline-block text-left'
+          : '';
+    return (
+      <ul className={`mt-3 space-y-1.5 text-ink-500 ${listAlign}`}>
+        {items.map((it, i) => (
+          <li key={i} className="flex items-start gap-2">
+            <span
+              className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-700"
+              aria-hidden
+            />
+            <span>{it}</span>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  // Paragraph mode
+  if (!card.description) return null;
+
+  if (card.collapsibleDescription) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className={`mt-3 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 ${
+            align === 'center' ? 'mx-auto' : align === 'right' ? 'ml-auto' : ''
+          }`}
+        >
+          {open ? 'Show less' : 'Read more'}
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {open && <p className="mt-2 text-ink-500">{card.description}</p>}
+      </>
+    );
+  }
+
+  return <p className="mt-3 text-ink-500">{card.description}</p>;
+}
+
+function CardItemRenderer({
+  card,
+  defaultAlign,
+}: {
+  card: CardItem;
+  defaultAlign: 'left' | 'center' | 'right';
+}) {
+  const align = resolveAlign(card.textAlign, defaultAlign);
   const visual = card.visual;
   const position = visual?.position ?? 'top';
   const isHorizontal = position === 'left' || position === 'right';
-  const [open, setOpen] = useState(!card.collapsibleDescription);
+  const hasVisual = visual && visual.kind !== 'none';
 
-  const inner = (
-    <>
-      {visual && visual.kind !== 'none' && position === 'top' && (
-        <div className={align === 'center' ? 'flex justify-center' : align === 'right' ? 'flex justify-end' : ''}>
-          <CardVisual visual={visual} />
-        </div>
-      )}
-      <div className={`p-6 ${textAlignClass(align)}`}>
-        {card.title && (
-          <h3 className="font-display text-xl font-bold text-ink-900">{card.title}</h3>
-        )}
-        {card.description && (
-          <>
-            {card.collapsibleDescription ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setOpen(!open)}
-                  className={`mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 ${
-                    align === 'center' ? 'mx-auto' : align === 'right' ? 'ml-auto' : ''
-                  }`}
-                >
-                  {open ? 'Show less' : 'Read more'}
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}
-                  />
-                </button>
-                {open && <p className="mt-2 text-ink-500">{card.description}</p>}
-              </>
-            ) : (
-              <p className="mt-2 text-ink-500">{card.description}</p>
-            )}
-          </>
-        )}
-        {card.href && (
-          <Link
-            to={card.href}
-            className={`mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 transition-all hover:gap-2 ${
-              align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : ''
+  // Vertical (icon-on-top) layout — matches the screenshot in your design
+  if (!isHorizontal) {
+    return (
+      <div className="card flex h-full flex-col p-6">
+        {hasVisual && (
+          <div
+            className={`mb-5 flex ${
+              align === 'center'
+                ? 'justify-center'
+                : align === 'right'
+                  ? 'justify-end'
+                  : 'justify-start'
             }`}
           >
-            Learn more <ChevronRight className="h-4 w-4" />
-          </Link>
-        )}
-      </div>
-    </>
-  );
-
-  return (
-    <div className="card overflow-hidden">
-      {isHorizontal ? (
-        <div
-          className={`flex items-start gap-4 p-6 ${
-            position === 'right' ? 'flex-row-reverse' : ''
-          }`}
-        >
-          {visual && visual.kind !== 'none' && <CardVisual visual={visual} />}
-          <div className={`flex-1 ${textAlignClass(align)}`}>
-            {card.title && (
-              <h3 className="font-display text-xl font-bold text-ink-900">{card.title}</h3>
-            )}
-            {card.description &&
-              (card.collapsibleDescription ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setOpen(!open)}
-                    className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-brand-700"
-                  >
-                    {open ? 'Show less' : 'Read more'}
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-                  {open && <p className="mt-2 text-ink-500">{card.description}</p>}
-                </>
-              ) : (
-                <p className="mt-2 text-ink-500">{card.description}</p>
-              ))}
-            {card.href && (
-              <Link
-                to={card.href}
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:gap-2 transition-all"
-              >
-                Learn more <ChevronRight className="h-4 w-4" />
-              </Link>
-            )}
+            <CardVisual visual={visual} />
           </div>
+        )}
+        <div className={`flex-1 ${textAlignClass(align)}`}>
+          {card.title && (
+            <h3 className="font-display text-lg font-bold text-ink-900">
+              {card.title}
+            </h3>
+          )}
+          <CardDescription card={card} align={align} />
+          {card.href && (
+            <Link
+              to={card.href}
+              className={`mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 transition-all hover:gap-2 ${
+                align === 'center'
+                  ? 'justify-center'
+                  : align === 'right'
+                    ? 'justify-end'
+                    : ''
+              }`}
+            >
+              Learn more <ChevronRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
-      ) : (
-        inner
-      )}
+      </div>
+    );
+  }
+
+  // Horizontal (icon-beside-text) layout
+  return (
+    <div className="card p-6">
+      <div
+        className={`flex items-start gap-4 ${
+          position === 'right' ? 'flex-row-reverse' : ''
+        }`}
+      >
+        {hasVisual && <CardVisual visual={visual} />}
+        <div className={`flex-1 ${textAlignClass(align)}`}>
+          {card.title && (
+            <h3 className="font-display text-lg font-bold text-ink-900">
+              {card.title}
+            </h3>
+          )}
+          <CardDescription card={card} align={align} />
+          {card.href && (
+            <Link
+              to={card.href}
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:gap-2 transition-all"
+            >
+              Learn more <ChevronRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -463,11 +606,23 @@ export function CardsRenderer({ data }: { data: Cards }) {
     );
   }
 
+  // Section header alignment — what controls eyebrow / title / description position
+  const headerAlignClass = textAlignClass(data.titleAlign ?? 'left');
+  const headerWrapClass =
+    data.titleAlign === 'center'
+      ? 'mx-auto'
+      : data.titleAlign === 'right'
+        ? 'ml-auto'
+        : '';
+
   return (
     <SectionBg background={data.background}>
       <section className="container-page py-12 md:py-16">
         {(data.eyebrow || data.title || data.description) && (
-          <motion.div {...fadeUp} className="mb-10 max-w-2xl">
+          <motion.div
+            {...fadeUp}
+            className={`mb-10 max-w-2xl ${headerWrapClass} ${headerAlignClass}`}
+          >
             {data.eyebrow && <p className="eyebrow text-brand-700">{data.eyebrow}</p>}
             {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
             {data.description && <p className="mt-3 text-ink-500">{data.description}</p>}

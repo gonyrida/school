@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/hooks/useAuth';
+import { LanguageProvider } from '@/hooks/useLanguage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 import { PublicLayout } from '@/components/layout/PublicLayout';
@@ -53,14 +54,15 @@ function NotFoundPage() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: { borderRadius: '12px', background: '#0f172a', color: '#fff' },
-          success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
-        }}
-      />
+    <LanguageProvider>
+      <AuthProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: { borderRadius: '12px', background: '#0f172a', color: '#fff' },
+            success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
+          }}
+        />
       <Routes>
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
@@ -151,6 +153,7 @@ export default function App() {
           <Route path="support" element={<Navigate to="/dashboard/pages/support" replace />} />
         </Route>
       </Routes>
-    </AuthProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

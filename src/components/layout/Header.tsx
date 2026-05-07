@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { ChevronDown, Search, Menu, X } from "lucide-react";
+import { ChevronDown, Search, Menu, X, Globe } from "lucide-react";
 import { NAV, SCHOOL_INFO } from "@/data/content";
 import { SchoolLogo } from "@/components/ui/SchoolLogo";
+import { useLanguage, LANGUAGES, type Language } from "@/hooks/useLanguage";
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
+  const { language, setLanguage } = useLanguage();
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-ink-300/10">
@@ -35,15 +37,21 @@ export function Header() {
 
           {/* Right utilities */}
           <div className="flex items-center gap-3 shrink-0">
-            <select
-              className="hidden md:block bg-white border border-ink-300/30 rounded-lg text-sm py-2 px-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-700/30"
-              defaultValue="en"
-              aria-label="Select language"
-            >
-              <option value="en">Language</option>
-              <option value="km">ខ្មែរ</option>
-              <option value="ar">العربية</option>
-            </select>
+            <div className="hidden md:flex items-center gap-1.5 rounded-lg border border-ink-300/30 bg-white px-2 py-1.5 cursor-pointer focus-within:ring-2 focus-within:ring-brand-700/30">
+              <Globe className="h-4 w-4 text-ink-500" aria-hidden />
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                aria-label="Select language"
+                className="bg-transparent text-sm cursor-pointer focus:outline-none"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.nativeLabel}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Link to="/support" className="hidden sm:inline-flex btn-primary !py-2.5 !px-5">
               Sponsor / Donate
             </Link>

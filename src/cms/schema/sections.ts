@@ -60,7 +60,11 @@ export type Background = z.infer<typeof BackgroundSchema>;
 export const CardItemSchema = z.object({
   id: z.string(),
   title: z.string().default(''),
+  // Description body. Either a single paragraph (description) OR a list
+  // of bullet points (descriptionList) — controlled by descriptionMode.
+  descriptionMode: z.enum(['paragraph', 'list']).default('paragraph'),
   description: z.string().default(''),
+  descriptionList: z.array(z.string()).default([]),
   // Visual element — either an image (with url) or an icon name (lucide-react)
   visual: z
     .object({
@@ -68,11 +72,21 @@ export const CardItemSchema = z.object({
       image: ImageRefSchema.optional(),
       iconName: z.string().default(''), // e.g. "GraduationCap", "BookOpen"
       shape: z.enum(['square', 'rounded', 'circle']).default('rounded'),
+      // Width/height of the visual badge in pixels (square aspect)
+      size: z.number().int().min(24).max(200).default(56),
       // Position of the visual relative to text
       position: z.enum(['top', 'left', 'right']).default('top'),
     })
-    .default({ kind: 'none', iconName: '', shape: 'rounded', position: 'top' }),
-  textAlign: z.enum(['left', 'center', 'right']).default('left'),
+    .default({
+      kind: 'none',
+      iconName: '',
+      shape: 'rounded',
+      size: 56,
+      position: 'top',
+    }),
+  // 'inherit' means the card uses the section's defaultTextAlign.
+  // Anything else overrides it on a per-card basis.
+  textAlign: z.enum(['inherit', 'left', 'center', 'right']).default('inherit'),
   // Whether the description should render collapsed (toggle reveal)
   collapsibleDescription: z.boolean().default(false),
   href: z.string().default(''),
@@ -128,10 +142,31 @@ export const CardsSectionSchema = z.object({
   eyebrow: z.string().default(''),
   title: z.string().default(''),
   description: z.string().default(''),
+  // Position of the section header (eyebrow / title / description)
+  titleAlign: z.enum(['left', 'center', 'right']).default('left'),
   layout: z.enum(['grid-2', 'grid-3', 'grid-4', 'list']).default('grid-3'),
   // Default text alignment for all cards (each card can override)
   defaultTextAlign: z.enum(['left', 'center', 'right']).default('left'),
   cards: z.array(CardItemSchema),
+  background: BackgroundSchema,
+});
+
+/**
+ * ImageText — side-by-side image and text block. Admin can swap which side
+ * the image is on; the text moves to the opposite side automatically.
+ */
+export const ImageTextSectionSchema = z.object({
+  eyebrow: z.string().default(''),
+  title: z.string().default(''),
+  // Body is rich HTML so admins can format paragraphs, lists, links, etc.
+  body: z.string().default(''),
+  image: ImageRefSchema.optional(),
+  imagePosition: z.enum(['left', 'right']).default('left'),
+  imageShape: z.enum(['square', 'rounded', 'circle']).default('rounded'),
+  // Verticalalignment of the text relative to the image
+  verticalAlign: z.enum(['top', 'center', 'bottom']).default('center'),
+  primaryButton: ButtonSchema.optional(),
+  secondaryButton: ButtonSchema.optional(),
   background: BackgroundSchema,
 });
 
@@ -241,6 +276,7 @@ export const SECTION_TYPES = [
   'hero',
   'banner',
   'rich_text',
+  'image_text',
   'stats',
   'cards',
   'gallery',
@@ -259,6 +295,7 @@ export const SECTION_SCHEMAS = {
   hero: HeroSectionSchema,
   banner: BannerSectionSchema,
   rich_text: RichTextSectionSchema,
+  image_text: ImageTextSectionSchema,
   stats: StatsSectionSchema,
   cards: CardsSectionSchema,
   gallery: GallerySectionSchema,
@@ -296,6 +333,12 @@ export const SECTION_META: Record<
     label: 'Rich Text',
     description: 'Formatted text content with TipTap editor',
     icon: 'AlignLeft',
+    category: 'Content',
+  },
+  image_text: {
+    label: 'Image + Text',
+    description: 'Image and text side-by-side. Swap which side the image is on.',
+    icon: 'Columns2',
     category: 'Content',
   },
   stats: {

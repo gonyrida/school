@@ -55,58 +55,78 @@ function migrateGallery(data: Record<string, unknown>): Record<string, unknown> 
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Cards: card items gained `visual`, `textAlign`, `collapsibleDescription`
-// in the v2 update. Old card items had `image`, `icon`, `href` only.
+// Cards: card items have evolved across versions.
+//   v1: { title, description, image?, icon?, href? }
+//   v2: + visual {kind, image, iconName, shape, position}, textAlign,
+//       collapsibleDescription
+//   v3: + visual.size, descriptionMode, descriptionList; textAlign gains
+//       'inherit'; CardsSection gains titleAlign
 // ─────────────────────────────────────────────────────────────────────────────
 
 function migrateCards(data: Record<string, unknown>): Record<string, unknown> {
-  const cards = data.cards;
-  if (!Array.isArray(cards)) return data;
+  // Section-level: ensure titleAlign exists (added in v3)
+  const out: Record<string, unknown> = { ...data };
+  if (out.titleAlign === undefined) out.titleAlign = 'left';
 
-  const migrated = cards.map((c) => {
+  const cards = out.cards;
+  if (!Array.isArray(cards)) return out;
+
+  out.cards = cards.map((c) => {
     if (!c || typeof c !== 'object') return c;
     const card = c as Record<string, unknown>;
 
-    // Already in the new shape — leave alone
-    if (card.visual && typeof card.visual === 'object') return card;
+    // Build/upgrade the visual object
+    let visual = card.visual as Record<string, unknown> | undefined;
+    if (!visual || typeof visual !== 'object') {
+      // v1 → v2 path: derive `visual` from old top-level image/icon fields
+      const oldImage = card.image as { url?: string; alt?: string } | undefined;
+      const oldIcon = card.icon as string | undefined;
 
-    // Derive a `visual` from old top-level image/icon fields
-    const oldImage = card.image as { url?: string; alt?: string } | undefined;
-    const oldIcon = card.icon as string | undefined;
-
-    let visual: Record<string, unknown> = {
-      kind: 'none',
-      iconName: '',
-      shape: 'rounded',
-      position: 'top',
-    };
-    if (oldImage && oldImage.url) {
       visual = {
-        kind: 'image',
-        image: { url: oldImage.url, alt: oldImage.alt ?? '' },
-        shape: 'rounded',
-        position: 'top',
+        kind: 'none',
         iconName: '',
-      };
-    } else if (oldIcon) {
-      visual = {
-        kind: 'icon',
-        iconName: oldIcon,
         shape: 'rounded',
+        size: 56,
         position: 'top',
       };
+      if (oldImage && oldImage.url) {
+        visual = {
+          kind: 'image',
+          image: { url: oldImage.url, alt: oldImage.alt ?? '' },
+          shape: 'rounded',
+          size: 56,
+          position: 'top',
+          iconName: '',
+        };
+      } else if (oldIcon) {
+        visual = {
+          kind: 'icon',
+          iconName: oldIcon,
+          shape: 'rounded',
+          size: 56,
+          position: 'top',
+        };
+      }
+    } else {
+      // v2 → v3: backfill `size` if missing
+      if (visual.size === undefined) visual = { ...visual, size: 56 };
     }
 
     return {
       id: card.id ?? crypto.randomUUID(),
       title: card.title ?? '',
+      // v3: descriptionMode + descriptionList
+      descriptionMode: card.descriptionMode ?? 'paragraph',
       description: card.description ?? '',
+      descriptionList: Array.isArray(card.descriptionList)
+        ? card.descriptionList
+        : [],
       href: card.href ?? '',
       visual,
-      textAlign: card.textAlign ?? 'left',
+      textAlign: card.textAlign ?? 'inherit',
       collapsibleDescription: card.collapsibleDescription ?? false,
     };
   });
 
-  return { ...data, cards: migrated };
+  return out;
 }

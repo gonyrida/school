@@ -37,6 +37,17 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         background: noBg,
       } as SectionData<T>;
 
+    case 'image_text':
+      return {
+        eyebrow: '',
+        title: 'Image with text',
+        body: '<p>Add some descriptive text here. You can use <strong>bold</strong>, <em>italics</em>, lists, and links.</p>',
+        imagePosition: 'left',
+        imageShape: 'rounded',
+        verticalAlign: 'center',
+        background: noBg,
+      } as SectionData<T>;
+
     case 'stats':
       return {
         title: '',
@@ -53,33 +64,58 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         eyebrow: '',
         title: 'New card grid',
         description: '',
+        titleAlign: 'left',
         layout: 'grid-3',
-        defaultTextAlign: 'left',
+        defaultTextAlign: 'center',
         cards: [
           {
             id: crypto.randomUUID(),
             title: 'Card one',
+            descriptionMode: 'paragraph',
             description: 'Short description',
-            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
-            textAlign: 'left',
+            descriptionList: [],
+            visual: {
+              kind: 'none',
+              iconName: '',
+              shape: 'rounded',
+              size: 56,
+              position: 'top',
+            },
+            textAlign: 'inherit',
             collapsibleDescription: false,
             href: '',
           },
           {
             id: crypto.randomUUID(),
             title: 'Card two',
+            descriptionMode: 'paragraph',
             description: 'Short description',
-            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
-            textAlign: 'left',
+            descriptionList: [],
+            visual: {
+              kind: 'none',
+              iconName: '',
+              shape: 'rounded',
+              size: 56,
+              position: 'top',
+            },
+            textAlign: 'inherit',
             collapsibleDescription: false,
             href: '',
           },
           {
             id: crypto.randomUUID(),
             title: 'Card three',
+            descriptionMode: 'paragraph',
             description: 'Short description',
-            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
-            textAlign: 'left',
+            descriptionList: [],
+            visual: {
+              kind: 'none',
+              iconName: '',
+              shape: 'rounded',
+              size: 56,
+              position: 'top',
+            },
+            textAlign: 'inherit',
             collapsibleDescription: false,
             href: '',
           },

@@ -22,6 +22,7 @@ const ALL_SECTIONS: SectionType[] = [
   'hero',
   'banner',
   'rich_text',
+  'image_text',
   'stats',
   'cards',
   'gallery',

@@ -33,6 +33,7 @@ export type FieldType =
   | 'color'
   | 'background'
   | 'repeater'
+  | 'string_list'
   | 'url';
 
 export interface BaseField {
@@ -101,6 +102,14 @@ export interface RepeaterField extends BaseField {
   max?: number;
 }
 
+export interface StringListField extends BaseField {
+  type: 'string_list';
+  itemPlaceholder?: string;
+  addLabel?: string; // e.g. "Add bullet"
+  min?: number;
+  max?: number;
+}
+
 export type FieldConfig =
   | TextField
   | NumberField
@@ -112,7 +121,8 @@ export type FieldConfig =
   | ToggleField
   | ColorField
   | BackgroundField
-  | RepeaterField;
+  | RepeaterField
+  | StringListField;
 
 export interface FieldGroup {
   title: string;
@@ -128,12 +138,37 @@ const APPEARANCE_GROUP: FieldGroup = {
 // Card item fields (used inside the cards repeater)
 const CARD_ITEM_FIELDS: FieldConfig[] = [
   { type: 'text', path: 'title', label: 'Title' },
-  { type: 'textarea', path: 'description', label: 'Description' },
+
+  // Description: paragraph or bulleted list
+  {
+    type: 'select',
+    path: 'descriptionMode',
+    label: 'Description style',
+    options: [
+      { value: 'paragraph', label: 'Paragraph (text)' },
+      { value: 'list', label: 'Bulleted list' },
+    ],
+  },
+  {
+    type: 'textarea',
+    path: 'description',
+    label: 'Description',
+    showIf: { path: 'descriptionMode', equals: 'paragraph' },
+  },
+  {
+    type: 'string_list',
+    path: 'descriptionList',
+    label: 'List items',
+    itemPlaceholder: 'Add a bullet point…',
+    addLabel: 'Add list item',
+    showIf: { path: 'descriptionMode', equals: 'list' },
+  },
   {
     type: 'toggle',
     path: 'collapsibleDescription',
     label: 'Collapsible description',
-    description: 'Show description behind a "Read more" toggle',
+    description: 'Hide the description behind a "Read more" toggle',
+    showIf: { path: 'descriptionMode', equals: 'paragraph' },
   },
   { type: 'url', path: 'href', label: 'Link URL', placeholder: '/admissions' },
 
@@ -168,10 +203,20 @@ const CARD_ITEM_FIELDS: FieldConfig[] = [
     label: 'Shape',
     showIf: { path: 'visual.kind', equals: ['image', 'icon'] },
     options: [
-      { value: 'square', label: 'Square' },
-      { value: 'rounded', label: 'Rounded' },
+      { value: 'square', label: 'Square (no rounding)' },
+      { value: 'rounded', label: 'Rounded corners' },
       { value: 'circle', label: 'Circle' },
     ],
+  },
+  {
+    type: 'number',
+    path: 'visual.size',
+    label: 'Visual size (px)',
+    description: 'Width and height of the icon/image badge',
+    min: 24,
+    max: 200,
+    step: 4,
+    showIf: { path: 'visual.kind', equals: ['image', 'icon'] },
   },
   {
     type: 'select',
@@ -188,7 +233,9 @@ const CARD_ITEM_FIELDS: FieldConfig[] = [
     type: 'select',
     path: 'textAlign',
     label: 'Text alignment',
+    description: 'Override the section default for this card',
     options: [
+      { value: 'inherit', label: 'Use section default' },
       { value: 'left', label: 'Left' },
       { value: 'center', label: 'Center' },
       { value: 'right', label: 'Right' },
@@ -290,6 +337,61 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
     APPEARANCE_GROUP,
   ],
 
+  image_text: [
+    {
+      title: 'Content',
+      fields: [
+        { type: 'text', path: 'eyebrow', label: 'Eyebrow' },
+        { type: 'text', path: 'title', label: 'Title' },
+        { type: 'richtext', path: 'body', label: 'Body' },
+      ],
+    },
+    {
+      title: 'Image',
+      fields: [
+        { type: 'image', path: 'image', label: 'Image', folder: 'cards' },
+        {
+          type: 'select',
+          path: 'imagePosition',
+          label: 'Image position',
+          description: 'When the image is on one side, text moves to the other',
+          options: [
+            { value: 'left', label: 'Left (text on right)' },
+            { value: 'right', label: 'Right (text on left)' },
+          ],
+        },
+        {
+          type: 'select',
+          path: 'imageShape',
+          label: 'Image shape',
+          options: [
+            { value: 'square', label: 'Square (no rounding)' },
+            { value: 'rounded', label: 'Rounded corners' },
+            { value: 'circle', label: 'Circle' },
+          ],
+        },
+        {
+          type: 'select',
+          path: 'verticalAlign',
+          label: 'Text vertical alignment',
+          options: [
+            { value: 'top', label: 'Top' },
+            { value: 'center', label: 'Center' },
+            { value: 'bottom', label: 'Bottom' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Buttons',
+      fields: [
+        { type: 'button', path: 'primaryButton', label: 'Primary Button' },
+        { type: 'button', path: 'secondaryButton', label: 'Secondary Button' },
+      ],
+    },
+    APPEARANCE_GROUP,
+  ],
+
   stats: [
     {
       title: 'Content',
@@ -321,6 +423,17 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
         { type: 'textarea', path: 'description', label: 'Description' },
         {
           type: 'select',
+          path: 'titleAlign',
+          label: 'Header alignment',
+          description: 'Position of the eyebrow / title / description',
+          options: [
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
+          ],
+        },
+        {
+          type: 'select',
           path: 'layout',
           label: 'Layout',
           options: [
@@ -333,7 +446,7 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
         {
           type: 'select',
           path: 'defaultTextAlign',
-          label: 'Default text alignment',
+          label: 'Default card text alignment',
           description: 'Each card can override this',
           options: [
             { value: 'left', label: 'Left' },
@@ -354,9 +467,17 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
           defaultItem: {
             id: '',
             title: 'New card',
+            descriptionMode: 'paragraph',
             description: '',
-            visual: { kind: 'none', iconName: '', shape: 'rounded', position: 'top' },
-            textAlign: 'left',
+            descriptionList: [],
+            visual: {
+              kind: 'none',
+              iconName: '',
+              shape: 'rounded',
+              size: 56,
+              position: 'top',
+            },
+            textAlign: 'inherit',
             collapsibleDescription: false,
             href: '',
           },

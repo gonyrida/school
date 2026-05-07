@@ -199,6 +199,15 @@ export function FieldRenderer({ field, data, onChange }: Props) {
           onChange={set}
         />
       );
+
+    case 'string_list':
+      return (
+        <StringListFieldComponent
+          field={field}
+          value={(value as string[]) ?? []}
+          onChange={set}
+        />
+      );
   }
 }
 
@@ -525,6 +534,105 @@ function BackgroundFieldComponent({
             className="input-field flex-1 font-mono text-sm"
           />
         </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// String list — editable list of plain strings (used for bulleted lists)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function StringListFieldComponent({
+  field,
+  value,
+  onChange,
+}: {
+  field: import('./fieldConfig').StringListField;
+  value: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const items = value ?? [];
+
+  const update = (idx: number, v: string) => {
+    const next = [...items];
+    next[idx] = v;
+    onChange(next);
+  };
+  const add = () => onChange([...items, '']);
+  const remove = (idx: number) => {
+    if (field.min !== undefined && items.length <= field.min) return;
+    onChange(items.filter((_, i) => i !== idx));
+  };
+  const move = (from: number, to: number) => {
+    if (to < 0 || to >= items.length) return;
+    const next = [...items];
+    const [m] = next.splice(from, 1);
+    next.splice(to, 0, m);
+    onChange(next);
+  };
+
+  const canAdd = field.max === undefined || items.length < field.max;
+  const canRemove = field.min === undefined || items.length > field.min;
+
+  return (
+    <div>
+      <Label field={field} />
+      <div className="space-y-2">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-2 rounded-xl border border-ink-300/20 bg-white px-2 py-1.5"
+          >
+            <span className="select-none text-sm text-ink-400 w-5 text-center">•</span>
+            <input
+              type="text"
+              value={item}
+              onChange={(e) => update(i, e.target.value)}
+              placeholder={field.itemPlaceholder ?? 'Add a list item…'}
+              className="flex-1 bg-transparent text-sm focus:outline-none"
+            />
+            <div className="flex items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => move(i, i - 1)}
+                disabled={i === 0}
+                className="rounded p-1 text-ink-400 hover:bg-ink-100 hover:text-ink-700 disabled:opacity-30"
+                title="Move up"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, i + 1)}
+                disabled={i === items.length - 1}
+                className="rounded p-1 text-ink-400 hover:bg-ink-100 hover:text-ink-700 disabled:opacity-30"
+                title="Move down"
+              >
+                ↓
+              </button>
+              {canRemove && (
+                <button
+                  type="button"
+                  onClick={() => remove(i)}
+                  className="rounded p-1 text-ink-400 hover:bg-red-50 hover:text-red-600"
+                  title="Remove"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {canAdd && (
+        <button
+          type="button"
+          onClick={add}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ink-300/40 py-2 text-xs font-medium text-ink-500 hover:border-brand-700 hover:text-brand-700"
+        >
+          <Plus className="h-3.5 w-3.5" /> {field.addLabel ?? 'Add item'}
+        </button>
       )}
     </div>
   );
