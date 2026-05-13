@@ -59,69 +59,38 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         background: noBg,
       } as SectionData<T>;
 
-    case 'cards':
+    case 'cards': {
+      const makeCard = (title: string): unknown => ({
+        id: crypto.randomUUID(),
+        title,
+        descriptionMode: 'paragraph',
+        description: 'Short description',
+        descriptionList: [],
+        visual: {
+          kind: 'none',
+          iconName: '',
+          shape: 'rounded',
+          size: 56,
+          position: 'top',
+        },
+        textAlign: 'inherit',
+        collapsibleDescription: false,
+        href: '',
+        cardBackground: { type: 'inherit', color: '' },
+        buttonAlign: 'left',
+      });
       return {
         eyebrow: '',
         title: 'New card grid',
         description: '',
         titleAlign: 'left',
         layout: 'grid-3',
+        lastCardPosition: 'left',
         defaultTextAlign: 'center',
-        cards: [
-          {
-            id: crypto.randomUUID(),
-            title: 'Card one',
-            descriptionMode: 'paragraph',
-            description: 'Short description',
-            descriptionList: [],
-            visual: {
-              kind: 'none',
-              iconName: '',
-              shape: 'rounded',
-              size: 56,
-              position: 'top',
-            },
-            textAlign: 'inherit',
-            collapsibleDescription: false,
-            href: '',
-          },
-          {
-            id: crypto.randomUUID(),
-            title: 'Card two',
-            descriptionMode: 'paragraph',
-            description: 'Short description',
-            descriptionList: [],
-            visual: {
-              kind: 'none',
-              iconName: '',
-              shape: 'rounded',
-              size: 56,
-              position: 'top',
-            },
-            textAlign: 'inherit',
-            collapsibleDescription: false,
-            href: '',
-          },
-          {
-            id: crypto.randomUUID(),
-            title: 'Card three',
-            descriptionMode: 'paragraph',
-            description: 'Short description',
-            descriptionList: [],
-            visual: {
-              kind: 'none',
-              iconName: '',
-              shape: 'rounded',
-              size: 56,
-              position: 'top',
-            },
-            textAlign: 'inherit',
-            collapsibleDescription: false,
-            href: '',
-          },
-        ],
+        cards: [makeCard('Card one'), makeCard('Card two'), makeCard('Card three')],
         background: noBg,
       } as SectionData<T>;
+    }
 
     case 'gallery':
       return {
@@ -210,6 +179,66 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         layout: 'grid-3',
         showViewAll: true,
         viewAllLabel: 'View all events',
+        background: noBg,
+      } as SectionData<T>;
+
+    case 'contact_info':
+      return {
+        eyebrow: '',
+        title: 'Get in touch',
+        description: '',
+        titleAlign: 'center',
+        layout: 'grid-3',
+        items: [
+          {
+            id: crypto.randomUUID(),
+            label: 'Address',
+            value: 'Phnom Penh, Cambodia',
+            icon: 'MapPin',
+            href: '',
+          },
+          {
+            id: crypto.randomUUID(),
+            label: 'Phone',
+            value: '+855 12 345 678',
+            icon: 'Phone',
+            href: 'tel:+85512345678',
+          },
+          {
+            id: crypto.randomUUID(),
+            label: 'Email',
+            value: 'info@norol-iman.edu.kh',
+            icon: 'Mail',
+            href: 'mailto:info@norol-iman.edu.kh',
+          },
+        ],
+        background: noBg,
+      } as SectionData<T>;
+
+    case 'contact_form':
+      return {
+        eyebrow: '',
+        title: "Let's keep in touch",
+        description:
+          'Reach out with any question — we typically respond within two business days.',
+        titleAlign: 'left',
+        nameLabel: 'Your Full Name',
+        emailLabel: 'Your Email',
+        messageLabel: 'Your Message',
+        submitLabel: 'Send Message',
+        successMessage: "Thanks! We'll be in touch soon.",
+        submitUrl: '',
+        background: noBg,
+      } as SectionData<T>;
+
+    case 'map':
+      return {
+        title: 'Find Us on Map',
+        description: '',
+        titleAlign: 'center',
+        embedUrl:
+          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62649.18!2d104.8773!3d11.5564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x310951298b8b8b8b%3A0x0!2sPhnom+Penh!5e0!3m2!1sen!2skh!4v1700000000000',
+        height: 'medium',
         background: noBg,
       } as SectionData<T>;
 

@@ -91,9 +91,9 @@ export default function App() {
           </Route>
 
           <Route path="admissions" element={<CmsPage pageKey="admissions" fallback={<AdmissionsPage />} />} />
-          <Route path="events" element={<EventsPage />} />
+          <Route path="events" element={<CmsPage pageKey="events" fallback={<EventsPage />} />} />
           <Route path="events/:slug" element={<EventDetailPage />} />
-          <Route path="contact" element={<ContactPage />} />
+          <Route path="contact" element={<CmsPage pageKey="contact" fallback={<ContactPage />} />} />
           <Route path="support" element={<CmsPage pageKey="support" fallback={<SupportPage />} />} />
 
           <Route path="*" element={<NotFoundPage />} />

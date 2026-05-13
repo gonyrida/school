@@ -1,0 +1,12 @@
+# robots.txt
+# Allow all search engines to crawl public pages.
+# The CMS dashboard at /dashboard is private (auth required); we explicitly
+# disallow crawling to keep it out of search results.
+
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+
+# Sitemap is regenerated on every build. See scripts/generate-sitemap.mjs.
+Sitemap: https://norol-iman.edu.kh/sitemap.xml

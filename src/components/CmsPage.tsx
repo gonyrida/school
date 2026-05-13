@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { useCmsPage } from '@/hooks/useCmsPage';
 import { PageRenderer } from '@/cms/renderer/PageRenderer';
+import { usePageSEO, organizationJsonLd } from '@/hooks/usePageSEO';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface Props {
   pageKey: string;
@@ -11,55 +13,54 @@ interface Props {
 /**
  * CmsPage — drop-in component that renders any CMS-backed page.
  *
- * Usage in routes (replaces a hardcoded page component):
- *
+ * Usage in routes:
  *   <Route path="curriculum" element={<CmsPage pageKey="curriculum" />} />
  *
- * The page's content (sections, copy, images, SEO) all come from the CMS,
- * so admins can change them without touching code.
+ * Handles:
+ *  - fetching page data via cms.getPage(key)
+ *  - applying all SEO tags (title, description, canonical, OG, Twitter, JSON-LD)
+ *  - dynamic rendering of every section via PageRenderer
  */
 export function CmsPage({ pageKey, fallback }: Props) {
   const { page, loading } = useCmsPage(pageKey);
+  const { language } = useLanguage();
 
-  // Apply SEO metadata
-  useEffect(() => {
-    if (!page) return;
-    const title = page.seo.metaTitle || page.title;
-    if (title) document.title = `${title} | Norol Iman High School`;
-
-    const ensureMeta = (name: string) => {
-      let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement('meta');
-        el.name = name;
-        document.head.appendChild(el);
-      }
-      return el;
-    };
-    const ensureOg = (property: string) => {
-      let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute('property', property);
-        document.head.appendChild(el);
-      }
-      return el;
-    };
-
-    if (page.seo.metaDescription) {
-      ensureMeta('description').content = page.seo.metaDescription;
-      ensureOg('og:description').content = page.seo.metaDescription;
+  // Compute SEO inputs — falls back to page title if metaTitle is empty,
+  // falls back to first hero/banner title if `page.title` is empty too.
+  const seoInputs = useMemo(() => {
+    if (!page) {
+      return {
+        title: 'Loading…',
+        description: undefined,
+        canonicalPath: pageKey === 'home' ? '/' : `/${pageKey}`,
+      };
     }
-    if (page.seo.ogImage?.url) {
-      ensureOg('og:image').content = page.seo.ogImage.url;
-    }
-    ensureOg('og:title').content = title;
-  }, [page]);
+    const heroTitle =
+      page.sections.find((s) => s.type === 'hero')?.data?.title as string | undefined;
+    const title = page.seo.metaTitle || page.title || heroTitle;
+    return {
+      title,
+      description: page.seo.metaDescription || undefined,
+      ogImage: page.seo.ogImage?.url,
+      canonicalPath: page.seo.slug || (pageKey === 'home' ? '/' : `/${pageKey}`),
+      locale: language,
+      // Attach organization JSON-LD on the home page so search engines
+      // pick up the school identity. Other pages omit JSON-LD by default;
+      // individual section types could provide their own in the future
+      // (e.g. event pages → Event schema, FAQ → FAQPage schema).
+      jsonLd: pageKey === 'home' ? organizationJsonLd() : undefined,
+    };
+  }, [page, pageKey, language]);
+
+  usePageSEO(seoInputs);
 
   if (loading) {
     return (
       <div className="container-page py-32 text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-brand-700 border-t-transparent" />
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-brand-700 border-t-transparent"
+          aria-label="Loading page"
+        />
       </div>
     );
   }

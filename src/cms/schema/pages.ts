@@ -33,6 +33,9 @@ const ALL_SECTIONS: SectionType[] = [
   'video',
   'timeline',
   'events_feed',
+  'contact_info',
+  'contact_form',
+  'map',
 ];
 
 export const PAGE_REGISTRY: PageDefinition[] = [
@@ -164,20 +167,86 @@ export const PAGE_REGISTRY: PageDefinition[] = [
     key: 'events',
     title: 'News & Events',
     route: '/events',
-    description: 'Events listing page (events themselves managed under News & Events module)',
-    allowedSections: ['hero', 'banner', 'rich_text'],
+    description: 'Events listing page (the page header — individual events managed under News & Events module)',
+    allowedSections: 'all',
     defaultSections: [
-      { type: 'hero', data: { title: 'News & Events', size: 'compact' } },
+      {
+        type: 'hero',
+        data: {
+          title: 'News & Events',
+          subtitle: 'Latest news, upcoming events, and community highlights from our school.',
+          size: 'compact',
+        },
+      },
+      {
+        type: 'events_feed',
+        data: {
+          title: 'All events',
+          limit: 12,
+          category: 'All',
+          layout: 'grid-3',
+          showViewAll: false,
+        },
+      },
     ],
   },
   {
     key: 'contact',
     title: 'Contact',
     route: '/contact',
-    description: 'Contact information and form',
-    allowedSections: ['hero', 'rich_text', 'cta'],
+    description: 'Contact information, form, and map',
+    allowedSections: 'all',
     defaultSections: [
-      { type: 'hero', data: { title: 'Contact Us', size: 'compact' } },
+      {
+        type: 'hero',
+        data: {
+          title: 'Contact Us',
+          subtitle: 'We would love to hear from you.',
+          size: 'compact',
+        },
+      },
+      {
+        type: 'contact_info',
+        data: {
+          title: 'Get in touch',
+          titleAlign: 'center',
+          layout: 'grid-3',
+          items: [
+            {
+              id: crypto.randomUUID(),
+              label: 'Address',
+              value: 'Phnom Penh, Cambodia',
+              icon: 'MapPin',
+              href: '',
+            },
+            {
+              id: crypto.randomUUID(),
+              label: 'Phone',
+              value: '+855 12 345 678',
+              icon: 'Phone',
+              href: 'tel:+85512345678',
+            },
+            {
+              id: crypto.randomUUID(),
+              label: 'Email',
+              value: 'info@norol-iman.edu.kh',
+              icon: 'Mail',
+              href: 'mailto:info@norol-iman.edu.kh',
+            },
+          ],
+        },
+      },
+      {
+        type: 'contact_form',
+        data: {
+          title: "Let's keep in touch",
+          description: 'Reach out with any question — we typically respond within two business days.',
+        },
+      },
+      {
+        type: 'map',
+        data: { title: 'Find Us on Map' },
+      },
     ],
   },
   {

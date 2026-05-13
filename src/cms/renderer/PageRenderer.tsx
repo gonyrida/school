@@ -18,6 +18,9 @@ import {
   VideoRenderer,
   TimelineRenderer,
   EventsFeedRenderer,
+  ContactInfoRenderer,
+  ContactFormRenderer,
+  MapRenderer,
 } from './sectionRenderers';
 
 /**
@@ -44,6 +47,9 @@ export const SECTION_COMPONENTS: Record<SectionType, ComponentType<{ data: any }
   video: VideoRenderer,
   timeline: TimelineRenderer,
   events_feed: EventsFeedRenderer,
+  contact_info: ContactInfoRenderer,
+  contact_form: ContactFormRenderer,
+  map: MapRenderer,
 };
 
 interface SectionRendererProps {

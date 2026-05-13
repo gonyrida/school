@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Tag } from 'lucide-react';
 import { ImageSlot } from '@/components/ui/ImageSlot';
 import { cms } from '@/cms/api';
 import type { EventPost } from '@/cms/api';
+import { usePageSEO } from '@/hooks/usePageSEO';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function EventDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [event, setEvent] = useState<EventPost | null>(null);
   const [related, setRelated] = useState<EventPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language } = useLanguage();
 
   useEffect(() => {
     if (!slug) return;
@@ -20,16 +23,41 @@ export default function EventDetailPage() {
         const found = all.find((e) => e.slug === slug) ?? null;
         setEvent(found);
         setRelated(all.filter((e) => e.id !== found?.id).slice(0, 3));
-
-        // Apply SEO
-        if (found) {
-          document.title = `${found.seo.metaTitle || found.title} | Norol Iman High School`;
-        }
       } finally {
         setLoading(false);
       }
     })();
   }, [slug]);
+
+  // Apply SEO with full article structured data
+  const seo = useMemo(() => {
+    if (!event) return { title: 'Loading…' };
+    return {
+      title: event.seo.metaTitle || event.title,
+      description: event.seo.metaDescription || event.excerpt || undefined,
+      ogImage: event.seo.ogImage?.url || event.coverImage?.url,
+      type: 'article' as const,
+      publishedTime: event.createdAt,
+      modifiedTime: event.updatedAt,
+      canonicalPath: `/events/${event.slug}`,
+      locale: language,
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: event.title,
+        description: event.excerpt,
+        image: event.coverImage?.url ? [event.coverImage.url] : undefined,
+        datePublished: event.createdAt,
+        dateModified: event.updatedAt,
+        author: { '@type': 'Organization', name: 'Norol Iman High School' },
+        publisher: { '@type': 'Organization', name: 'Norol Iman High School' },
+        articleSection: event.category,
+        keywords: event.tags.join(', '),
+      } as Record<string, unknown>,
+    };
+  }, [event, language]);
+
+  usePageSEO(seo);
 
   if (loading) {
     return (

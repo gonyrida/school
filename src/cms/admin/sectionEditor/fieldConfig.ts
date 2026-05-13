@@ -139,7 +139,7 @@ const APPEARANCE_GROUP: FieldGroup = {
 const CARD_ITEM_FIELDS: FieldConfig[] = [
   { type: 'text', path: 'title', label: 'Title' },
 
-  // Description: paragraph or bulleted list
+  // Description: paragraph, bulleted list, or both stacked
   {
     type: 'select',
     path: 'descriptionMode',
@@ -147,13 +147,14 @@ const CARD_ITEM_FIELDS: FieldConfig[] = [
     options: [
       { value: 'paragraph', label: 'Paragraph (text)' },
       { value: 'list', label: 'Bulleted list' },
+      { value: 'both', label: 'Both: paragraph + list' },
     ],
   },
   {
     type: 'textarea',
     path: 'description',
     label: 'Description',
-    showIf: { path: 'descriptionMode', equals: 'paragraph' },
+    showIf: { path: 'descriptionMode', equals: ['paragraph', 'both'] },
   },
   {
     type: 'string_list',
@@ -161,7 +162,7 @@ const CARD_ITEM_FIELDS: FieldConfig[] = [
     label: 'List items',
     itemPlaceholder: 'Add a bullet point…',
     addLabel: 'Add list item',
-    showIf: { path: 'descriptionMode', equals: 'list' },
+    showIf: { path: 'descriptionMode', equals: ['list', 'both'] },
   },
   {
     type: 'toggle',
@@ -170,7 +171,7 @@ const CARD_ITEM_FIELDS: FieldConfig[] = [
     description: 'Hide the description behind a "Read more" toggle',
     showIf: { path: 'descriptionMode', equals: 'paragraph' },
   },
-  { type: 'url', path: 'href', label: 'Link URL', placeholder: '/admissions' },
+  { type: 'url', path: 'href', label: 'Link URL (whole card)', placeholder: '/admissions' },
 
   // Visual element controls
   {
@@ -240,6 +241,43 @@ const CARD_ITEM_FIELDS: FieldConfig[] = [
       { value: 'center', label: 'Center' },
       { value: 'right', label: 'Right' },
     ],
+  },
+
+  // Button inside the card
+  { type: 'button', path: 'button', label: 'Card button' },
+  {
+    type: 'select',
+    path: 'buttonAlign',
+    label: 'Button alignment',
+    description: 'Only used when card button is set',
+    options: [
+      { value: 'left', label: 'Left' },
+      { value: 'center', label: 'Center' },
+      { value: 'right', label: 'Right' },
+    ],
+  },
+
+  // Per-card background
+  {
+    type: 'select',
+    path: 'cardBackground.type',
+    label: 'Card background',
+    options: [
+      { value: 'inherit', label: 'Default (white)' },
+      { value: 'none', label: 'None (transparent)' },
+      { value: 'white', label: 'White' },
+      { value: 'soft', label: 'Soft' },
+      { value: 'muted', label: 'Muted' },
+      { value: 'brand', label: 'Brand' },
+      { value: 'dark', label: 'Dark' },
+      { value: 'color', label: 'Custom color' },
+    ],
+  },
+  {
+    type: 'color',
+    path: 'cardBackground.color',
+    label: 'Custom background color',
+    showIf: { path: 'cardBackground.type', equals: 'color' },
   },
 ];
 
@@ -437,10 +475,23 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
           path: 'layout',
           label: 'Layout',
           options: [
+            { value: 'grid-1', label: '1 column' },
             { value: 'grid-2', label: '2 columns' },
             { value: 'grid-3', label: '3 columns' },
             { value: 'grid-4', label: '4 columns' },
             { value: 'list', label: 'List (stacked)' },
+          ],
+        },
+        {
+          type: 'select',
+          path: 'lastCardPosition',
+          label: 'Last card position (2-column layout)',
+          description: 'Where the last card sits when the total count is odd',
+          showIf: { path: 'layout', equals: 'grid-2' },
+          options: [
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
           ],
         },
         {
@@ -480,6 +531,8 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
             textAlign: 'inherit',
             collapsibleDescription: false,
             href: '',
+            cardBackground: { type: 'inherit', color: '' },
+            buttonAlign: 'left',
           },
           fields: CARD_ITEM_FIELDS,
         },
@@ -717,6 +770,149 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
         },
         { type: 'toggle', path: 'showViewAll', label: 'Show "View all" link' },
         { type: 'text', path: 'viewAllLabel', label: '"View all" label' },
+      ],
+    },
+    APPEARANCE_GROUP,
+  ],
+
+  contact_info: [
+    {
+      title: 'Header',
+      fields: [
+        { type: 'text', path: 'eyebrow', label: 'Eyebrow' },
+        { type: 'text', path: 'title', label: 'Title' },
+        { type: 'textarea', path: 'description', label: 'Description' },
+        {
+          type: 'select',
+          path: 'titleAlign',
+          label: 'Title alignment',
+          options: [
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
+          ],
+        },
+        {
+          type: 'select',
+          path: 'layout',
+          label: 'Layout',
+          options: [
+            { value: 'grid-2', label: '2 columns' },
+            { value: 'grid-3', label: '3 columns' },
+            { value: 'list', label: 'List (stacked)' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Contact channels',
+      fields: [
+        {
+          type: 'repeater',
+          path: 'items',
+          label: 'Contact items',
+          itemLabel: 'Item',
+          defaultItem: { id: '', label: '', value: '', icon: 'MapPin', href: '' },
+          fields: [
+            { type: 'text', path: 'label', label: 'Label', placeholder: 'Address' },
+            { type: 'textarea', path: 'value', label: 'Value', placeholder: 'Phnom Penh, Cambodia' },
+            {
+              type: 'icon',
+              path: 'icon',
+              label: 'Icon',
+              description: 'lucide name — e.g. MapPin, Phone, Mail',
+            },
+            {
+              type: 'url',
+              path: 'href',
+              label: 'Link (optional)',
+              placeholder: 'tel:+855... / mailto:... / https://maps.app.goo.gl/...',
+            },
+          ],
+        },
+      ],
+    },
+    APPEARANCE_GROUP,
+  ],
+
+  contact_form: [
+    {
+      title: 'Header',
+      fields: [
+        { type: 'text', path: 'eyebrow', label: 'Eyebrow' },
+        { type: 'text', path: 'title', label: 'Title' },
+        { type: 'textarea', path: 'description', label: 'Description' },
+        {
+          type: 'select',
+          path: 'titleAlign',
+          label: 'Title alignment',
+          options: [
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
+          ],
+        },
+        { type: 'image', path: 'sideImage', label: 'Side illustration', folder: 'uploads' },
+      ],
+    },
+    {
+      title: 'Form fields',
+      fields: [
+        { type: 'text', path: 'nameLabel', label: 'Name field label' },
+        { type: 'text', path: 'emailLabel', label: 'Email field label' },
+        { type: 'text', path: 'messageLabel', label: 'Message field label' },
+        { type: 'text', path: 'submitLabel', label: 'Submit button label' },
+        { type: 'text', path: 'successMessage', label: 'Success message' },
+        {
+          type: 'url',
+          path: 'submitUrl',
+          label: 'Form submit URL',
+          description: 'Leave empty to show success message only. Use Formspree, your API, etc.',
+          placeholder: 'https://formspree.io/f/xyz',
+        },
+      ],
+    },
+    APPEARANCE_GROUP,
+  ],
+
+  map: [
+    {
+      title: 'Header',
+      fields: [
+        { type: 'text', path: 'title', label: 'Title' },
+        { type: 'textarea', path: 'description', label: 'Description' },
+        {
+          type: 'select',
+          path: 'titleAlign',
+          label: 'Title alignment',
+          options: [
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
+          ],
+        },
+      ],
+    },
+    {
+      title: 'Map',
+      fields: [
+        {
+          type: 'textarea',
+          path: 'embedUrl',
+          label: 'Map embed URL',
+          description:
+            'Paste a Google Maps embed URL. In Google Maps: Share → Embed a map → copy the src="..." value.',
+        },
+        {
+          type: 'select',
+          path: 'height',
+          label: 'Map height',
+          options: [
+            { value: 'small', label: 'Small (300px)' },
+            { value: 'medium', label: 'Medium (500px)' },
+            { value: 'large', label: 'Large (700px)' },
+          ],
+        },
       ],
     },
     APPEARANCE_GROUP,

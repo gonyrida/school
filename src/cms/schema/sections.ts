@@ -60,9 +60,8 @@ export type Background = z.infer<typeof BackgroundSchema>;
 export const CardItemSchema = z.object({
   id: z.string(),
   title: z.string().default(''),
-  // Description body. Either a single paragraph (description) OR a list
-  // of bullet points (descriptionList) — controlled by descriptionMode.
-  descriptionMode: z.enum(['paragraph', 'list']).default('paragraph'),
+  // Description body. Single paragraph, bulleted list, or both stacked.
+  descriptionMode: z.enum(['paragraph', 'list', 'both']).default('paragraph'),
   description: z.string().default(''),
   descriptionList: z.array(z.string()).default([]),
   // Visual element — either an image (with url) or an icon name (lucide-react)
@@ -89,7 +88,23 @@ export const CardItemSchema = z.object({
   textAlign: z.enum(['inherit', 'left', 'center', 'right']).default('inherit'),
   // Whether the description should render collapsed (toggle reveal)
   collapsibleDescription: z.boolean().default(false),
+  // When `descriptionMode === 'both'`, the card renders the paragraph
+  // description AND the bulleted list, stacked.
+  // (For backward compat, descriptionMode in CardItemSchema is widened below.)
   href: z.string().default(''),
+  // Per-card background override. When type === 'inherit', use the card grid's
+  // default card surface (white). Otherwise admin can pick a preset or custom.
+  cardBackground: z
+    .object({
+      type: z
+        .enum(['inherit', 'none', 'white', 'soft', 'muted', 'brand', 'dark', 'color'])
+        .default('inherit'),
+      color: z.string().default(''),
+    })
+    .default({ type: 'inherit', color: '' }),
+  // Optional button rendered inside the card
+  button: ButtonSchema.optional(),
+  buttonAlign: z.enum(['left', 'center', 'right']).default('left'),
 });
 export type CardItem = z.infer<typeof CardItemSchema>;
 
@@ -142,9 +157,13 @@ export const CardsSectionSchema = z.object({
   eyebrow: z.string().default(''),
   title: z.string().default(''),
   description: z.string().default(''),
-  // Position of the section header (eyebrow / title / description)
+  // Alignment of the section title only (NOT the description or eyebrow).
+  // Use sectionHeaderAlign for the whole header block alignment.
   titleAlign: z.enum(['left', 'center', 'right']).default('left'),
-  layout: z.enum(['grid-2', 'grid-3', 'grid-4', 'list']).default('grid-3'),
+  layout: z.enum(['grid-1', 'grid-2', 'grid-3', 'grid-4', 'list']).default('grid-3'),
+  // When `layout === 'grid-2'` and there's an odd-numbered last card,
+  // this controls where the lonely last card sits.
+  lastCardPosition: z.enum(['left', 'center', 'right']).default('left'),
   // Default text alignment for all cards (each card can override)
   defaultTextAlign: z.enum(['left', 'center', 'right']).default('left'),
   cards: z.array(CardItemSchema),
@@ -268,6 +287,70 @@ export const EventsFeedSectionSchema = z.object({
   background: BackgroundSchema,
 });
 
+/**
+ * ContactInfoSection — address, phone, email cards.
+ * Admin enters each contact channel as a repeater item.
+ */
+export const ContactInfoSectionSchema = z.object({
+  eyebrow: z.string().default(''),
+  title: z.string().default('Get in touch'),
+  description: z.string().default(''),
+  titleAlign: z.enum(['left', 'center', 'right']).default('center'),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      label: z.string().default(''),    // "Address", "Phone", "Email"
+      value: z.string().default(''),    // The actual address/phone/email
+      icon: z.string().default(''),     // lucide name like 'MapPin', 'Phone'
+      href: z.string().default(''),     // Optional click-through (mailto:, tel:, maps URL)
+    }),
+  ),
+  layout: z.enum(['grid-2', 'grid-3', 'list']).default('grid-3'),
+  background: BackgroundSchema,
+});
+
+/**
+ * ContactFormSection — admin-managed contact form copy.
+ * Form submission target (e.g., Formspree / API endpoint) and field labels
+ * are all editable. Form posts to `submitUrl` or shows a default success
+ * message if no submitUrl is configured (useful before the school sets up
+ * a form backend).
+ */
+export const ContactFormSectionSchema = z.object({
+  eyebrow: z.string().default(''),
+  title: z.string().default("Let's keep in touch"),
+  description: z.string().default(''),
+  titleAlign: z.enum(['left', 'center', 'right']).default('left'),
+  // Field labels (editable so non-English sites can localize)
+  nameLabel: z.string().default('Your Full Name'),
+  emailLabel: z.string().default('Your Email'),
+  messageLabel: z.string().default('Your Message'),
+  submitLabel: z.string().default('Send Message'),
+  successMessage: z.string().default("Thanks! We'll be in touch soon."),
+  submitUrl: z.string().default(''),
+  // Optional side illustration
+  sideImage: ImageRefSchema.optional(),
+  background: BackgroundSchema,
+});
+
+/**
+ * MapSection — embedded map with admin-controlled location.
+ * The simplest reliable approach is to let admin paste a Google Maps embed
+ * URL (or any iframe src). The renderer wraps it in a styled container.
+ */
+export const MapSectionSchema = z.object({
+  title: z.string().default('Find Us on Map'),
+  description: z.string().default(''),
+  titleAlign: z.enum(['left', 'center', 'right']).default('center'),
+  embedUrl: z
+    .string()
+    .default(
+      'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62649.18!2d104.8773!3d11.5564!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x310951298b8b8b8b%3A0x0!2sPhnom+Penh!5e0!3m2!1sen!2skh!4v1700000000000',
+    ),
+  height: z.enum(['small', 'medium', 'large']).default('medium'),
+  background: BackgroundSchema,
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Section type registry
 // ─────────────────────────────────────────────────────────────────────────────
@@ -287,6 +370,9 @@ export const SECTION_TYPES = [
   'video',
   'timeline',
   'events_feed',
+  'contact_info',
+  'contact_form',
+  'map',
 ] as const;
 
 export type SectionType = (typeof SECTION_TYPES)[number];
@@ -306,6 +392,9 @@ export const SECTION_SCHEMAS = {
   video: VideoSectionSchema,
   timeline: TimelineSectionSchema,
   events_feed: EventsFeedSectionSchema,
+  contact_info: ContactInfoSectionSchema,
+  contact_form: ContactFormSectionSchema,
+  map: MapSectionSchema,
 } as const;
 
 export type SectionData<T extends SectionType = SectionType> = z.infer<
@@ -400,6 +489,24 @@ export const SECTION_META: Record<
     description: 'Display latest news & events on any page',
     icon: 'Calendar',
     category: 'Content',
+  },
+  contact_info: {
+    label: 'Contact Info',
+    description: 'Address, phone, email cards with icons',
+    icon: 'Phone',
+    category: 'Contact',
+  },
+  contact_form: {
+    label: 'Contact Form',
+    description: 'Editable contact form with optional submission endpoint',
+    icon: 'Mail',
+    category: 'Contact',
+  },
+  map: {
+    label: 'Map',
+    description: 'Embedded map (Google Maps or any iframe URL)',
+    icon: 'Map',
+    category: 'Contact',
   },
 };
 

@@ -19,6 +19,9 @@ import type {
   VideoSectionSchema,
   TimelineSectionSchema,
   EventsFeedSectionSchema,
+  ContactInfoSectionSchema,
+  ContactFormSectionSchema,
+  MapSectionSchema,
   Background,
   CardItem,
 } from '@/cms/schema/sections';
@@ -381,6 +384,8 @@ export function StatsRenderer({ data }: { data: Stats }) {
 
 const cardLayoutClass = (layout: Cards['layout']) => {
   switch (layout) {
+    case 'grid-1':
+      return 'grid-cols-1 mx-auto max-w-2xl';
     case 'grid-2':
       return 'grid-cols-1 md:grid-cols-2';
     case 'grid-3':
@@ -448,6 +453,34 @@ function resolveAlign(
   return cardAlign;
 }
 
+function CardListItems({
+  items,
+  align,
+}: {
+  items: string[];
+  align: 'left' | 'center' | 'right';
+}) {
+  const listAlign =
+    align === 'center'
+      ? 'mx-auto inline-block text-left'
+      : align === 'right'
+        ? 'ml-auto inline-block text-left'
+        : '';
+  return (
+    <ul className={`mt-3 space-y-1.5 text-ink-500 ${listAlign}`}>
+      {items.map((it, i) => (
+        <li key={i} className="flex items-start gap-2">
+          <span
+            className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-700"
+            aria-hidden
+          />
+          <span>{it}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function CardDescription({
   card,
   align,
@@ -456,34 +489,28 @@ function CardDescription({
   align: 'left' | 'center' | 'right';
 }) {
   const [open, setOpen] = useState(!card.collapsibleDescription);
+  const listItems = (card.descriptionList ?? []).filter((s) => s.trim().length > 0);
+  const hasParagraph = Boolean(card.description);
+  const hasList = listItems.length > 0;
 
-  // Bulleted list mode
+  // List-only mode
   if (card.descriptionMode === 'list') {
-    const items = (card.descriptionList ?? []).filter((s) => s.trim().length > 0);
-    if (items.length === 0) return null;
-    const listAlign =
-      align === 'center'
-        ? 'mx-auto inline-block text-left'
-        : align === 'right'
-          ? 'ml-auto inline-block text-left'
-          : '';
+    if (!hasList) return null;
+    return <CardListItems items={listItems} align={align} />;
+  }
+
+  // Both modes — paragraph + list, stacked
+  if (card.descriptionMode === 'both') {
     return (
-      <ul className={`mt-3 space-y-1.5 text-ink-500 ${listAlign}`}>
-        {items.map((it, i) => (
-          <li key={i} className="flex items-start gap-2">
-            <span
-              className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-brand-700"
-              aria-hidden
-            />
-            <span>{it}</span>
-          </li>
-        ))}
-      </ul>
+      <>
+        {hasParagraph && <p className="mt-3 text-ink-500">{card.description}</p>}
+        {hasList && <CardListItems items={listItems} align={align} />}
+      </>
     );
   }
 
   // Paragraph mode
-  if (!card.description) return null;
+  if (!hasParagraph) return null;
 
   if (card.collapsibleDescription) {
     return (
@@ -508,6 +535,55 @@ function CardDescription({
   return <p className="mt-3 text-ink-500">{card.description}</p>;
 }
 
+/**
+ * Compute the inline style + class for a card's background.
+ * Returns whether text should flip to white (for dark/brand backgrounds).
+ */
+function cardBgFor(bg: CardItem['cardBackground']): {
+  className: string;
+  style?: React.CSSProperties;
+} {
+  if (!bg || bg.type === 'inherit') return { className: 'card' };
+  switch (bg.type) {
+    case 'none':
+      return { className: 'rounded-2xl' };
+    case 'white':
+      return { className: 'rounded-2xl bg-white shadow-soft' };
+    case 'soft':
+      return { className: 'rounded-2xl bg-surface-soft' };
+    case 'muted':
+      return { className: 'rounded-2xl bg-surface-muted' };
+    case 'brand':
+      return { className: 'rounded-2xl bg-brand-700 text-white' };
+    case 'dark':
+      return { className: 'rounded-2xl bg-ink-900 text-white' };
+    case 'color':
+      return {
+        className: 'rounded-2xl',
+        style: { backgroundColor: bg.color || 'transparent' },
+      };
+  }
+}
+
+function CardButton({
+  button,
+  align,
+}: {
+  button: CardItem['button'];
+  align: CardItem['buttonAlign'];
+}) {
+  if (!button || !button.label) return null;
+  const justify =
+    align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start';
+  return (
+    <div className={`mt-4 flex ${justify}`}>
+      <Link to={button.href || '#'} className={buttonClass(button.variant)}>
+        {button.label}
+      </Link>
+    </div>
+  );
+}
+
 function CardItemRenderer({
   card,
   defaultAlign,
@@ -520,11 +596,15 @@ function CardItemRenderer({
   const position = visual?.position ?? 'top';
   const isHorizontal = position === 'left' || position === 'right';
   const hasVisual = visual && visual.kind !== 'none';
+  const bg = cardBgFor(card.cardBackground);
 
-  // Vertical (icon-on-top) layout — matches the screenshot in your design
+  // Vertical (icon-on-top) layout
   if (!isHorizontal) {
     return (
-      <div className="card flex h-full flex-col p-6">
+      <div
+        className={`flex h-full flex-col p-6 ${bg.className}`}
+        style={bg.style}
+      >
         {hasVisual && (
           <div
             className={`mb-5 flex ${
@@ -540,9 +620,7 @@ function CardItemRenderer({
         )}
         <div className={`flex-1 ${textAlignClass(align)}`}>
           {card.title && (
-            <h3 className="font-display text-lg font-bold text-ink-900">
-              {card.title}
-            </h3>
+            <h3 className="font-display text-lg font-bold">{card.title}</h3>
           )}
           <CardDescription card={card} align={align} />
           {card.href && (
@@ -559,6 +637,7 @@ function CardItemRenderer({
               Learn more <ChevronRight className="h-4 w-4" />
             </Link>
           )}
+          <CardButton button={card.button} align={card.buttonAlign ?? 'left'} />
         </div>
       </div>
     );
@@ -566,7 +645,7 @@ function CardItemRenderer({
 
   // Horizontal (icon-beside-text) layout
   return (
-    <div className="card p-6">
+    <div className={`p-6 ${bg.className}`} style={bg.style}>
       <div
         className={`flex items-start gap-4 ${
           position === 'right' ? 'flex-row-reverse' : ''
@@ -575,9 +654,7 @@ function CardItemRenderer({
         {hasVisual && <CardVisual visual={visual} />}
         <div className={`flex-1 ${textAlignClass(align)}`}>
           {card.title && (
-            <h3 className="font-display text-lg font-bold text-ink-900">
-              {card.title}
-            </h3>
+            <h3 className="font-display text-lg font-bold">{card.title}</h3>
           )}
           <CardDescription card={card} align={align} />
           {card.href && (
@@ -588,6 +665,7 @@ function CardItemRenderer({
               Learn more <ChevronRight className="h-4 w-4" />
             </Link>
           )}
+          <CardButton button={card.button} align={card.buttonAlign ?? 'left'} />
         </div>
       </div>
     </div>
@@ -606,40 +684,47 @@ export function CardsRenderer({ data }: { data: Cards }) {
     );
   }
 
-  // Section header alignment — what controls eyebrow / title / description position
-  const headerAlignClass = textAlignClass(data.titleAlign ?? 'left');
-  const headerWrapClass =
-    data.titleAlign === 'center'
-      ? 'mx-auto'
-      : data.titleAlign === 'right'
-        ? 'ml-auto'
-        : '';
-
   return (
     <SectionBg background={data.background}>
       <section className="container-page py-12 md:py-16">
         {(data.eyebrow || data.title || data.description) && (
-          <motion.div
-            {...fadeUp}
-            className={`mb-10 max-w-2xl ${headerWrapClass} ${headerAlignClass}`}
-          >
+          <motion.div {...fadeUp} className="mb-10 max-w-2xl">
             {data.eyebrow && <p className="eyebrow text-brand-700">{data.eyebrow}</p>}
-            {data.title && <h2 className="section-title mt-2">{data.title}</h2>}
+            {data.title && (
+              <h2 className={`section-title mt-2 ${textAlignClass(data.titleAlign ?? 'left')}`}>
+                {data.title}
+              </h2>
+            )}
             {data.description && <p className="mt-3 text-ink-500">{data.description}</p>}
           </motion.div>
         )}
         <div className={`grid gap-6 ${cardLayoutClass(data.layout)}`}>
-          {data.cards.map((card, i) => (
-            <motion.div
-              key={card.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.05 }}
-            >
-              <CardItemRenderer card={card} defaultAlign={data.defaultTextAlign} />
-            </motion.div>
-          ))}
+          {data.cards.map((card, i) => {
+            // Handle lastCardPosition for 2-column layouts with odd count
+            const isLastOdd =
+              data.layout === 'grid-2' &&
+              i === data.cards.length - 1 &&
+              data.cards.length % 2 === 1;
+            const lastClass = isLastOdd
+              ? data.lastCardPosition === 'center'
+                ? 'md:col-span-2 md:max-w-md md:mx-auto'
+                : data.lastCardPosition === 'right'
+                  ? 'md:col-start-2'
+                  : '' // 'left' is the default position
+              : '';
+            return (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className={lastClass}
+              >
+                <CardItemRenderer card={card} defaultAlign={data.defaultTextAlign} />
+              </motion.div>
+            );
+          })}
         </div>
       </section>
     </SectionBg>
@@ -1277,6 +1362,260 @@ export function EventsFeedRenderer({ data }: { data: EventsFeed }) {
             ))}
           </div>
         )}
+      </section>
+    </SectionBg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Contact Info — labeled cards with icons (address / phone / email / etc.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type ContactInfo = z.infer<typeof ContactInfoSectionSchema>;
+
+export function ContactInfoRenderer({ data }: { data: ContactInfo }) {
+  if (data.items.length === 0) return null;
+
+  const layoutClass =
+    data.layout === 'list'
+      ? 'grid-cols-1 max-w-3xl mx-auto'
+      : data.layout === 'grid-2'
+        ? 'grid-cols-1 md:grid-cols-2'
+        : 'grid-cols-1 md:grid-cols-3';
+
+  return (
+    <SectionBg background={data.background}>
+      <section className="container-page py-12 md:py-16">
+        {(data.eyebrow || data.title || data.description) && (
+          <motion.div {...fadeUp} className="mb-10 max-w-2xl mx-auto text-center">
+            {data.eyebrow && <p className="eyebrow text-brand-700">{data.eyebrow}</p>}
+            {data.title && (
+              <h2 className={`section-title mt-2 ${textAlignClass(data.titleAlign ?? 'center')}`}>
+                {data.title}
+              </h2>
+            )}
+            {data.description && <p className="mt-3 text-ink-500">{data.description}</p>}
+          </motion.div>
+        )}
+        <div className={`grid gap-6 ${layoutClass}`}>
+          {data.items.map((item) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const Icon = (Icons as any)[item.icon] ?? Icons.MapPin;
+            const inner = (
+              <div className="card flex items-start gap-4 p-6 h-full">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  {item.label && (
+                    <p className="text-xs font-semibold uppercase tracking-wider text-ink-500">
+                      {item.label}
+                    </p>
+                  )}
+                  {item.value && (
+                    <p className="mt-1 font-display font-bold text-ink-900 break-words">
+                      {item.value}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+            return item.href ? (
+              <a
+                key={item.id}
+                href={item.href}
+                target={item.href.startsWith('http') ? '_blank' : undefined}
+                rel="noreferrer"
+                className="block transition-transform hover:-translate-y-0.5"
+              >
+                {inner}
+              </a>
+            ) : (
+              <div key={item.id}>{inner}</div>
+            );
+          })}
+        </div>
+      </section>
+    </SectionBg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Contact Form — admin-managed form (labels editable, optional submit URL)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type ContactForm = z.infer<typeof ContactFormSectionSchema>;
+
+export function ContactFormRenderer({ data }: { data: ContactForm }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!data.submitUrl) {
+      // No backend configured — pretend success so admins can preview the flow
+      setStatus('sent');
+      setName('');
+      setEmail('');
+      setMessage('');
+      return;
+    }
+    setStatus('submitting');
+    try {
+      const res = await fetch(data.submitUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (!res.ok) throw new Error('Submission failed');
+      setStatus('sent');
+      setName('');
+      setEmail('');
+      setMessage('');
+    } catch {
+      setStatus('error');
+    }
+  };
+
+  return (
+    <SectionBg background={data.background}>
+      <section className="container-page py-12 md:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+          <motion.div {...fadeUp}>
+            {data.eyebrow && <p className="eyebrow text-brand-700">{data.eyebrow}</p>}
+            {data.title && (
+              <h2 className={`font-display text-2xl sm:text-3xl font-bold text-brand-700 mt-2 ${textAlignClass(data.titleAlign ?? 'left')}`}>
+                {data.title}
+              </h2>
+            )}
+            {data.description && (
+              <p className="text-sm text-ink-500 leading-relaxed mt-2 max-w-md">
+                {data.description}
+              </p>
+            )}
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-ink-700 mb-1.5">
+                  {data.nameLabel}
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-ink-700 mb-1.5">
+                  {data.emailLabel}
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-ink-700 mb-1.5">
+                  {data.messageLabel}
+                </label>
+                <textarea
+                  rows={4}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                  className="input-field resize-none"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={status === 'submitting'}
+                className="btn-primary disabled:opacity-60"
+              >
+                {status === 'submitting' ? 'Sending…' : data.submitLabel}
+              </button>
+              {status === 'sent' && (
+                <p className="text-sm text-green-700">{data.successMessage}</p>
+              )}
+              {status === 'error' && (
+                <p className="text-sm text-red-600">
+                  Something went wrong. Please try again or contact us directly.
+                </p>
+              )}
+            </form>
+          </motion.div>
+
+          <motion.div
+            {...fadeUp}
+            className="hidden lg:flex items-center justify-center"
+          >
+            {data.sideImage?.url ? (
+              <img
+                src={data.sideImage.url}
+                alt={data.sideImage.alt}
+                className="rounded-3xl object-cover w-full max-h-[500px]"
+              />
+            ) : (
+              <ImageSlot className="rounded-3xl w-full aspect-[4/5]" />
+            )}
+          </motion.div>
+        </div>
+      </section>
+    </SectionBg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Map — embedded iframe (Google Maps, etc.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+type MapSection = z.infer<typeof MapSectionSchema>;
+
+export function MapRenderer({ data }: { data: MapSection }) {
+  const heightPx =
+    data.height === 'small' ? '300px' : data.height === 'large' ? '700px' : '500px';
+
+  return (
+    <SectionBg background={data.background}>
+      <section className="container-page py-12 md:py-16">
+        {(data.title || data.description) && (
+          <motion.div {...fadeUp} className="mb-8 max-w-2xl mx-auto text-center">
+            {data.title && (
+              <h2 className={`section-title ${textAlignClass(data.titleAlign ?? 'center')}`}>
+                {data.title}
+              </h2>
+            )}
+            {data.description && (
+              <p className="mt-3 text-ink-500">{data.description}</p>
+            )}
+          </motion.div>
+        )}
+        <div
+          className="rounded-2xl overflow-hidden border border-ink-300/10"
+          style={{ height: heightPx }}
+        >
+          {data.embedUrl ? (
+            <iframe
+              title={data.title || 'Map'}
+              src={data.embedUrl}
+              width="100%"
+              height="100%"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              style={{ border: 0 }}
+            />
+          ) : (
+            <div className="h-full w-full bg-surface-soft flex items-center justify-center text-ink-500 text-sm">
+              Add a map embed URL in the editor
+            </div>
+          )}
+        </div>
       </section>
     </SectionBg>
   );
