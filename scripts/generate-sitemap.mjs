@@ -32,33 +32,20 @@ const SITE_URL = (
   process.env.VITE_SITE_URL || 'https://officemuckup.com'
 ).replace(/\/$/, '');
 
-// const STATIC_ROUTES = [
-//   { path: '/', changefreq: 'weekly', priority: 1.0 },
-//   { path: '/about/school', changefreq: 'monthly', priority: 0.9 },
-//   { path: '/about/leader', changefreq: 'monthly', priority: 0.7 },
-//   { path: '/about/dormitory', changefreq: 'monthly', priority: 0.7 },
-//   { path: '/curriculum', changefreq: 'monthly', priority: 0.9 },
-//   { path: '/curriculum/kindergarten', changefreq: 'monthly', priority: 0.7 },
-//   { path: '/curriculum/elementary', changefreq: 'monthly', priority: 0.7 },
-//   { path: '/admissions', changefreq: 'monthly', priority: 0.9 },
-//   { path: '/events', changefreq: 'weekly', priority: 0.8 },
-//   { path: '/contact', changefreq: 'monthly', priority: 0.7 },
-//   { path: '/support', changefreq: 'monthly', priority: 0.6 },
-// ];
-
 const STATIC_ROUTES = [
-  "/",
-  "/about/school",
-  "/about/leader",
-  "/about/dormitory",
-  "/curriculum",
-  "/curriculum/kindergarten",
-  "/curriculum/elementary",
-  "/admissions",
-  "/events",
-  "/contact",
-  "/support"
+  { path: '/', changefreq: 'weekly', priority: 1.0 },
+  { path: '/about/school', changefreq: 'monthly', priority: 0.9 },
+  { path: '/about/leader', changefreq: 'monthly', priority: 0.7 },
+  { path: '/about/dormitory', changefreq: 'monthly', priority: 0.7 },
+  { path: '/curriculum', changefreq: 'monthly', priority: 0.9 },
+  { path: '/curriculum/kindergarten', changefreq: 'monthly', priority: 0.7 },
+  { path: '/curriculum/elementary', changefreq: 'monthly', priority: 0.7 },
+  { path: '/admissions', changefreq: 'monthly', priority: 0.9 },
+  { path: '/events', changefreq: 'weekly', priority: 0.8 },
+  { path: '/contact', changefreq: 'monthly', priority: 0.7 },
+  { path: '/support', changefreq: 'monthly', priority: 0.6 },
 ];
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fetch events from Supabase (best-effort)
