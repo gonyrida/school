@@ -21,7 +21,7 @@ export const siteConfig = {
    * If you deploy to a different domain, change this value — that's the only
    * place it needs to be updated.
    */
-  siteUrl: import.meta.env?.VITE_SITE_URL ?? 'https://norol-iman.edu.kh',
+  siteUrl: import.meta.env?.VITE_SITE_URL ?? 'https://officemuckup',
 
   /** Default social-share image. Should be ~1200×630 for OG, ~1200×600 for Twitter. */
   defaultOgImage: '/og-default.jpg',
@@ -50,7 +50,7 @@ export const siteConfig = {
     },
     contactPoint: {
       telephone: '+855-12-345-678',
-      email: 'info@norol-iman.edu.kh',
+      email: 'info@officemuckup',
     },
     sameAs: [
       // Facebook/Instagram/etc. profile URLs — fill in when available

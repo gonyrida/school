@@ -207,9 +207,9 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
           {
             id: crypto.randomUUID(),
             label: 'Email',
-            value: 'info@norol-iman.edu.kh',
+            value: 'info@officemuckup',
             icon: 'Mail',
-            href: 'mailto:info@norol-iman.edu.kh',
+            href: 'mailto:info@officemuckup',
           },
         ],
         background: noBg,
