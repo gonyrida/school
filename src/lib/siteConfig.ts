@@ -21,7 +21,7 @@ export const siteConfig = {
    * If you deploy to a different domain, change this value — that's the only
    * place it needs to be updated.
    */
-  siteUrl: import.meta.env?.VITE_SITE_URL ?? 'https://officemuckup',
+  siteUrl: import.meta.env?.VITE_SITE_URL ?? 'https://officemuckup.com',
 
   /** Default social-share image. Should be ~1200×630 for OG, ~1200×600 for Twitter. */
   defaultOgImage: '/og-default.jpg',
