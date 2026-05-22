@@ -42,8 +42,7 @@ export const HOMEPAGE = {
   intro: {
     eyebrow: "Welcome",
     title: "TITLE",
-    body:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna. Pellentesque sit amet sapien fringilla, mattis ligula consectetur, ultrices mauris. Maecenas vitae mattis tellus. Nullam quis imperdiet augue. Vestibulum auctor ornare leo.",
+    body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna. Pellentesque sit amet sapien fringilla, mattis ligula consectetur, ultrices mauris. Maecenas vitae mattis tellus. Nullam quis imperdiet augue. Vestibulum auctor ornare leo.",
   },
   pathways: [
     {
@@ -86,17 +85,53 @@ export const HOMEPAGE = {
     },
   ],
   features: [
-    { title: "Innovative Learning", description: "Lorem ipsum dolor sit amet, dolor sit amet, consectetur adipiscing elit." },
-    { title: "Expert Teachers", description: "Lorem ipsum dolor sit amet, dolor sit amet, consectetur adipiscing elit." },
-    { title: "Modern Facilities", description: "Lorem ipsum dolor sit amet, dolor sit amet, consectetur adipiscing elit." },
+    {
+      title: "Innovative Learning",
+      description:
+        "Lorem ipsum dolor sit amet, dolor sit amet, consectetur adipiscing elit.",
+    },
+    {
+      title: "Expert Teachers",
+      description:
+        "Lorem ipsum dolor sit amet, dolor sit amet, consectetur adipiscing elit.",
+    },
+    {
+      title: "Modern Facilities",
+      description:
+        "Lorem ipsum dolor sit amet, dolor sit amet, consectetur adipiscing elit.",
+    },
   ],
   admissionSteps: [
-    { title: "Inquiry", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna." },
-    { title: "Visit", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna." },
-    { title: "Application", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna." },
-    { title: "Assessment", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna." },
-    { title: "Interview", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna." },
-    { title: "Enrollment", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna." },
+    {
+      title: "Inquiry",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.",
+    },
+    {
+      title: "Visit",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.",
+    },
+    {
+      title: "Application",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.",
+    },
+    {
+      title: "Assessment",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.",
+    },
+    {
+      title: "Interview",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.",
+    },
+    {
+      title: "Enrollment",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna.",
+    },
   ],
   testimonials: [
     {
@@ -173,10 +208,22 @@ export const EVENTS = [
 ];
 
 export const STUDENT_LIFE = [
-  { title: "Daily Routines", excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-  { title: "Sports & Wellness", excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-  { title: "Art & Music", excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-  { title: "Community Outreach", excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+  {
+    title: "Daily Routines",
+    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  },
+  {
+    title: "Sports & Wellness",
+    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  },
+  {
+    title: "Art & Music",
+    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  },
+  {
+    title: "Community Outreach",
+    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  },
 ];
 
 export const FAQS = [
@@ -209,9 +256,21 @@ export const LEADERS = {
     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi.",
   },
   team: [
-    { name: "Sarah Ibrahim", role: "Vice Principal", bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-    { name: "Mohammed Yusuf", role: "Head of Academics", bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
-    { name: "Fatima Noor", role: "Head of Wellness", bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+    {
+      name: "Sarah Ibrahim",
+      role: "Vice Principal",
+      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
+    {
+      name: "Mohammed Yusuf",
+      role: "Head of Academics",
+      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
+    {
+      name: "Fatima Noor",
+      role: "Head of Wellness",
+      bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    },
   ],
   staff: Array.from({ length: 12 }, (_, i) => ({
     name: `Staff Member ${i + 1}`,
@@ -244,7 +303,8 @@ export const SCHOOL_INFO = {
   tagline: "Excellence in Education",
   email: "noroliman.school@gmail.com",
   phones: ["096 651 6718", "097 777 0033"],
-  address: "Phnom Penh, Cambodia",
+  address:
+    "Chrouy Metrey Village, Russey Chroy Commune, Muk Kampoul District, Kandal Province, Cambodia",
   socials: {
     facebook: "#",
     instagram: "#",
