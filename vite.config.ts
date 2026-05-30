@@ -9,6 +9,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    middlewareMode: false,
+    historyApiFallback: true,
+  },
   build: {
     chunkSizeWarningLimit: 800,
     rollupOptions: {
