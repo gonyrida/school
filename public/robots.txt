@@ -9,4 +9,4 @@ Disallow: /dashboard
 Disallow: /login
 
 # Sitemap is regenerated on every build. See scripts/generate-sitemap.mjs.
-Sitemap: https://officemuckup.com/sitemap.xml
+Sitemap: https://noroliman.com/sitemap.xml
