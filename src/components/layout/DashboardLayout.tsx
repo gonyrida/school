@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileText,
@@ -10,8 +10,12 @@ import {
   Search,
   Menu,
   X,
+  LogOut,
+  ChevronLeft,
+  User,
 } from 'lucide-react';
 import { SchoolLogo } from '@/components/ui/SchoolLogo';
+import { useAuth } from '@/hooks/useAuth';
 
 const NAV_GROUPS: Array<{
   title?: string;
@@ -39,6 +43,21 @@ const NAV_GROUPS: Array<{
 
 export function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  // ✅ FIX 2: Use navigate(-1) for alias-safe back navigation.
+  // If there's no history (user landed directly on /dashboard), fall back to '/'.
+  const handleBackToSite = () => {
+    // Navigate to the public home — safe across any deploy alias/domain
+    navigate('/');
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-surface-muted flex">
@@ -93,6 +112,19 @@ export function DashboardLayout() {
               </div>
             </div>
           ))}
+
+          {/* Back to site — inside sidebar for mobile convenience */}
+          <div className="pt-4 border-t border-white/10">
+            <button
+              onClick={handleBackToSite}
+              className="flex w-full items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-brand-800 hover:text-white transition"
+            >
+              <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center">
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </span>
+              Back to Site
+            </button>
+          </div>
         </nav>
       </aside>
 
@@ -128,15 +160,73 @@ export function DashboardLayout() {
             </div>
 
             <div className="ml-auto flex items-center gap-3">
-              <Link to="/" className="hidden sm:inline-flex btn-ghost text-xs">
-                ← Back to site
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full checker-bg" />
-                <div className="hidden sm:block">
-                  <p className="text-sm font-bold text-ink-900">Admin User</p>
-                  <p className="text-xs text-ink-500">Administrator</p>
-                </div>
+              {/* ✅ FIX 2: Use button + navigate('/') instead of <Link to="/"> */}
+              <button
+                onClick={handleBackToSite}
+                className="hidden sm:inline-flex items-center gap-1.5 btn-ghost text-xs"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Back to site
+              </button>
+
+              {/* ✅ FIX 4: Profile icon with dropdown to edit profile */}
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-3 group"
+                >
+                  <div className="w-10 h-10 rounded-full checker-bg overflow-hidden flex items-center justify-center bg-brand-100">
+                    {user?.user_metadata?.avatar_url ? (
+                      <img
+                        src={user.user_metadata.avatar_url}
+                        alt="avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-brand-700" />
+                    )}
+                  </div>
+                  <div className="hidden sm:block text-left">
+                    <p className="text-sm font-bold text-ink-900">
+                      {user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'Admin'}
+                    </p>
+                    <p className="text-xs text-ink-500">
+                      {user?.user_metadata?.role ?? 'Administrator'}
+                    </p>
+                  </div>
+                </button>
+
+                {profileOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setProfileOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-ink-300/10 z-20 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-ink-300/10">
+                        <p className="text-sm font-bold text-ink-900 truncate">
+                          {user?.user_metadata?.full_name ?? 'Admin User'}
+                        </p>
+                        <p className="text-xs text-ink-500 truncate">{user?.email}</p>
+                      </div>
+                      <NavLink
+                        to="/dashboard/profile"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-ink-700 hover:bg-surface-muted transition"
+                      >
+                        <User className="h-4 w-4" />
+                        Edit Profile
+                      </NavLink>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
