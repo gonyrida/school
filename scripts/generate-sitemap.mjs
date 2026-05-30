@@ -29,7 +29,7 @@ const ROOT = resolve(__dirname, '..');
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SITE_URL = (
-  process.env.VITE_SITE_URL || 'https://officemuckup.com'
+  process.env.VITE_SITE_URL || 'https://noroliman.com'
 ).replace(/\/$/, '');
 
 const STATIC_ROUTES = [

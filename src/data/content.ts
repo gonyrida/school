@@ -301,7 +301,7 @@ export const CURRICULUM_SUBJECTS = {
 export const SCHOOL_INFO = {
   name: "Norol Iman High School",
   tagline: "Excellence in Education",
-  email: "noroliman.school@gmail.com",
+  email: "info@noroliman.com",
   phones: ["096 651 6718", "097 777 0033"],
   address:
     "Chrouy Metrey Village, Russey Chroy Commune, Muk Kampoul District, Kandal Province, Cambodia",

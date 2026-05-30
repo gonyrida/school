@@ -229,9 +229,9 @@ export const PAGE_REGISTRY: PageDefinition[] = [
             {
               id: crypto.randomUUID(),
               label: 'Email',
-              value: 'info@officemuckup',
+              value: 'info@noroliman.com',
               icon: 'Mail',
-              href: 'mailto:info@officemuckup',
+              href: 'mailto:info@noroliman.com',
             },
           ],
         },

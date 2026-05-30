@@ -4,7 +4,7 @@
  * Single source of truth for site-wide values that feed SEO meta tags,
  * structured data, the sitemap generator, and the OG/Twitter cards.
  *
- * In a production deployment, set `siteUrl` to your actual domain and update
+  * In a production deployment, set `siteUrl` to your actual domain and update
  * `social` + `school` with the school's real contact details.
  */
 
@@ -21,7 +21,7 @@ export const siteConfig = {
    * If you deploy to a different domain, change this value — that's the only
    * place it needs to be updated.
    */
-  siteUrl: import.meta.env?.VITE_SITE_URL ?? 'https://officemuckup.com',
+  siteUrl: import.meta.env?.VITE_SITE_URL ?? 'https://noroliman.com',
 
   /** Default social-share image. Should be ~1200×630 for OG, ~1200×600 for Twitter. */
   defaultOgImage: '/og-default.jpg',
@@ -50,7 +50,7 @@ export const siteConfig = {
     },
     contactPoint: {
       telephone: '+855-12-345-678',
-      email: 'info@officemuckup',
+      email: 'info@noroliman.com',
     },
     sameAs: [
       // Facebook/Instagram/etc. profile URLs — fill in when available
@@ -60,8 +60,8 @@ export const siteConfig = {
 
 /**
  * Build a canonical URL by appending a route to `siteUrl`.
- * Examples: canonicalUrl('/') -> 'https://...edu.kh/'
- *           canonicalUrl('/about/school') -> 'https://...edu.kh/about/school'
+ * Examples: canonicalUrl('/') -> 'https://noroliman.com/'
+ *           canonicalUrl('/about/school') -> 'https://noroliman.com/about/school'
  */
 export function canonicalUrl(path: string): string {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
