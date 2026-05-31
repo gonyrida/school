@@ -306,10 +306,10 @@ export const SCHOOL_INFO = {
   address:
     "Chrouy Metrey Village, Russey Chroy Commune, Muk Kampoul District, Kandal Province, Cambodia",
   socials: {
-    facebook: "#",
-    instagram: "#",
-    telegram: "#",
-    youtube: "#",
-    twitter: "#",
+    facebook: "https://www.facebook.com/share/1GxdKXiJNj/?mibextid=wwXIfr",
+    instagram: "https://www.instagram.com/nics_school?utm_source=qr",
+    telegram: "https://t.me/NICSSCHOOL",
+    youtube: "https://youtube.com/@norolimanschool?si=yvHC8YS-AKwxeJXa",
+    twitter: "https://x.com/nics_school?s=11",
   },
 };
