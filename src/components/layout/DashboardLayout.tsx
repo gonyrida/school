@@ -145,7 +145,7 @@ function SidebarContent({
       {/* ── Nav ──
           ✅ FIX 2: overflow-hidden (not overflow-y-auto) so NO scrollbar ever appears.
           All nav items fit without scrolling; if you add many items switch to overflow-y-auto. */}
-      <nav className="flex-1 px-2 py-4 overflow-hidden flex flex-col gap-4">
+      <nav className="scrollbar-none flex-1 px-2 py-4 overflow-y-auto flex flex-col gap-4">
         {NAV_GROUPS.map((group, gi) => (
           <div key={gi}>
             {/* Group title — only when expanded */}
@@ -242,7 +242,7 @@ export function DashboardLayout() {
           position: 'sticky',
           top: 0,
           height: '100vh',
-          overflow: 'hidden',   // ✅ FIX 2: never show scrollbar on sidebar
+          overflow: 'hidden',
         }}
       >
         <SidebarContent

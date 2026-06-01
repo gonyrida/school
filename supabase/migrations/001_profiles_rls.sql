@@ -9,8 +9,8 @@ create table if not exists public.profiles (
   email           text,
   full_name       text,
   avatar_url      text,
-  role            text not null default 'editor'
-                    check (role in ('admin', 'editor')),
+  role            text not null default 'admin'
+                    check (role in ('admin')),
   created_at      timestamptz default now(),
   last_sign_in_at timestamptz
 );
@@ -48,7 +48,7 @@ begin
     new.id,
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
-    coalesce(new.raw_user_meta_data->>'role', 'editor')
+    coalesce(new.raw_user_meta_data->>'role', 'admin')
   )
   on conflict (id) do update set
     email     = excluded.email,
