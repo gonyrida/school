@@ -78,3 +78,95 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ─── i18n: Khmer language ─────────────────────────────────────────── */
+:lang(km) body,
+:lang(km) h1,
+:lang(km) h2,
+:lang(km) h3,
+:lang(km) h4,
+:lang(km) h5,
+:lang(km) h6,
+:lang(km) p,
+:lang(km) span,
+:lang(km) a,
+:lang(km) button,
+:lang(km) input,
+:lang(km) textarea,
+:lang(km) select,
+:lang(km) label {
+  font-family: 'Noto Sans Khmer', sans-serif;
+  /* Khmer script needs slightly more line-height */
+  line-height: 1.9;
+}
+
+:lang(km) .eyebrow {
+  /* Khmer doesn't use uppercase / letter-spacing the same way */
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ─── i18n: Arabic RTL ──────────────────────────────────────────────── */
+:lang(ar) body,
+:lang(ar) h1,
+:lang(ar) h2,
+:lang(ar) h3,
+:lang(ar) h4,
+:lang(ar) h5,
+:lang(ar) h6,
+:lang(ar) p,
+:lang(ar) span,
+:lang(ar) a,
+:lang(ar) button,
+:lang(ar) input,
+:lang(ar) textarea,
+:lang(ar) select,
+:lang(ar) label {
+  font-family: 'Noto Kufi Arabic', 'Segoe UI', system-ui, sans-serif;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.8;
+  /* Arabic typography: disable latin ligatures */
+  font-feature-settings: normal;
+  letter-spacing: 0;
+}
+
+/* Arabic: flip eyebrow tracking */
+:lang(ar) .eyebrow {
+  text-transform: none;
+  letter-spacing: 0;
+  direction: rtl;
+}
+
+/* Arabic: Tailwind gap/flex utilities already flip with dir=rtl via logical props.
+   These patches handle any remaining edge-cases. */
+:lang(ar) .container-page {
+  direction: rtl;
+}
+
+/* Form inputs in RTL */
+:lang(ar) .input-field {
+  text-align: right;
+}
+
+/* Icon + text rows: ensure icons stay on the correct side */
+:lang(ar) .btn-primary svg,
+:lang(ar) .btn-outline svg,
+:lang(ar) .btn-ghost svg {
+  /* Icons should visually mirror for directional ones (arrows). 
+     Non-directional icons (Globe, Mail) are excluded via JS className when needed. */
+  transform: scaleX(-1);
+}
+
+/* Arrow icons that should NOT flip (add class .icon-no-flip to override) */
+:lang(ar) .icon-no-flip {
+  transform: none !important;
+}
+
+/* ─── Font loading (Google Fonts) ───────────────────────────────────── */
+/* Add this to your index.html <head> for best performance:
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+*/

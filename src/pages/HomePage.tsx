@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { ImageSlot } from "@/components/ui/ImageSlot";
-import { HOMEPAGE } from "@/data/content";
 import { IntroSection } from "@/components/sections/IntroSection";
 import { EducationPathway } from "@/components/sections/EducationPathway";
 import { EventsSection } from "@/components/sections/EventsSection";
@@ -13,8 +12,11 @@ import { RequirementSection } from "@/components/sections/RequirementSection";
 import { GalleryPreview } from "@/components/sections/GalleryPreview";
 import { TestimonialSection } from "@/components/sections/TestimonialSection";
 import { ContactFormSection } from "@/components/sections/ContactFormSection";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function HomePage() {
+  const { t } = useTranslation();
+
   return (
     <>
       {/* Hero */}
@@ -27,15 +29,17 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-ink-900 leading-[1.05] tracking-tight">
-              {HOMEPAGE.hero.title}
+              {t("home.hero_title")}
             </h1>
-            <p className="mt-5 text-base text-ink-500 max-w-xl">{HOMEPAGE.hero.subtitle}</p>
+            <p className="mt-5 text-base text-ink-500 max-w-xl">
+              {t("home.hero_subtitle")}
+            </p>
             <div className="mt-7 flex flex-wrap gap-3">
-              <Link to={HOMEPAGE.hero.primaryCta.href} className="btn-primary">
-                {HOMEPAGE.hero.primaryCta.label}
+              <Link to="/admissions" className="btn-primary">
+                {t("home.primary_cta")}
               </Link>
-              <Link to={HOMEPAGE.hero.secondaryCta.href} className="btn-outline">
-                {HOMEPAGE.hero.secondaryCta.label} <ArrowRight className="h-4 w-4" />
+              <Link to="/curriculum" className="btn-outline">
+                {t("home.secondary_cta")} <ArrowRight className="icon-no-flip h-4 w-4" />
               </Link>
             </div>
           </motion.div>
