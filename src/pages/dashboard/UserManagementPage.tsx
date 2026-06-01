@@ -227,7 +227,7 @@ export default function UserManagementPage() {
   const handleDelete = async (userId: string) => {
     setDeleting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('delete-admin-user', { body: { user_id: userId } });
+      const { data, error } = await supabase.functions.invoke('delete-admin-user', { body: { userId } });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setUsers(prev => prev.filter(u => u.id !== userId));
