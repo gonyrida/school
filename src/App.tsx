@@ -29,6 +29,10 @@ import ElementaryPage from '@/pages/curriculum/ElementaryPage';
 import AdmissionsPage from '@/pages/AdmissionsPage';
 import SupportPage from '@/pages/SupportPage';
 
+// Blog pages
+import BlogListPage from '@/pages/blog/BlogListPage';
+import BlogDetailPage from '@/pages/blog/BlogDetailPage';
+
 import LoginPage from '@/pages/dashboard/LoginPage';
 import DashboardOverviewPage from '@/pages/dashboard/OverviewPage';
 import UserManagementPage from '@/pages/dashboard/UserManagementPage'; // ← FIX 5
@@ -39,6 +43,11 @@ import PageBuilderPage from '@/cms/admin/pages/PageBuilderPage';
 import EventsListPage from '@/cms/admin/pages/EventsListPage';
 import EventEditPage from '@/cms/admin/pages/EventEditPage';
 import MediaLibraryPage from '@/cms/admin/pages/MediaLibraryPage';
+
+// Admin blog pages
+import AdminBlogListPage from '@/pages/admin/blog/AdminBlogListPage';
+import AdminBlogCreatePage from '@/pages/admin/blog/AdminBlogCreatePage';
+import AdminBlogEditPage from '@/pages/admin/blog/AdminBlogEditPage';
 
 function NotFoundPage() {
   return (
@@ -85,6 +94,8 @@ export default function App() {
             <Route path="admissions" element={<CmsPage pageKey="admissions" fallback={<AdmissionsPage />} />} />
             <Route path="events" element={<CmsPage pageKey="events" fallback={<EventsPage />} />} />
             <Route path="events/:slug" element={<EventDetailPage />} />
+            <Route path="blog" element={<BlogListPage />} />
+            <Route path="blog/:slug" element={<BlogDetailPage />} />
             <Route path="contact" element={<CmsPage pageKey="contact" fallback={<ContactPage />} />} />
             <Route path="support" element={<CmsPage pageKey="support" fallback={<SupportPage />} />} />
             <Route path="*" element={<NotFoundPage />} />
@@ -105,6 +116,9 @@ export default function App() {
             <Route path="events/new" element={<EventEditPage />} />
             <Route path="events/:id" element={<EventEditPage />} />
             <Route path="media" element={<MediaLibraryPage />} />
+            <Route path="blog" element={<AdminBlogListPage />} />
+            <Route path="blog/new" element={<AdminBlogCreatePage />} />
+            <Route path="blog/edit/:id" element={<AdminBlogEditPage />} />
 
             {/* ✅ FIX 5: Real user management */}
             <Route path="users" element={<UserManagementPage />} />

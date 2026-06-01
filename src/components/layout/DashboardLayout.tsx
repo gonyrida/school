@@ -10,7 +10,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, Calendar, ImageIcon,
   UserCog, Settings, Search, Menu, X,
-  LogOut, ChevronLeft, ChevronRight, User,
+  LogOut, ChevronLeft, ChevronRight, User, BookOpen,
 } from 'lucide-react';
 import { SchoolLogo } from '@/components/ui/SchoolLogo';
 import { useAuth } from '@/hooks/useAuth';
@@ -34,6 +34,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/dashboard/pages',  label: 'Pages',         icon: FileText   },
       { to: '/dashboard/events', label: 'News & Events', icon: Calendar   },
+      { to: '/dashboard/blog',   label: 'Blog',          icon: BookOpen   },
       { to: '/dashboard/media',  label: 'Media Library', icon: ImageIcon  },
     ],
   },

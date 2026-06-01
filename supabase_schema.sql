@@ -105,3 +105,51 @@ create policy "Admins have full access to media"
 --     on storage.objects for delete
 --     to authenticated
 --     using (bucket_id = 'media');
+
+-- ── blogs ────────────────────────────────────────────────────
+create table if not exists public.blogs (
+  id          uuid        primary key default gen_random_uuid(),
+  slug        text        not null unique,
+  title       text        not null default '',
+  excerpt     text,
+  content     text        not null,
+  cover_image text,
+  cover_alt   text,
+  published   boolean     not null default false,
+  seo         jsonb       not null default '{}'::jsonb,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+alter table public.blogs enable row level security;
+
+create policy "Public can read published blogs"
+  on public.blogs for select
+  using (published = true);
+
+create policy "Admins have full access to blogs"
+  on public.blogs for all
+  to authenticated
+  using (true)
+  with check (true);
+
+-- ── Storage bucket for blog images ──────────────────────────
+-- Run this separately if the bucket doesn't already exist:
+--
+--   insert into storage.buckets (id, name, public)
+--   values ('blog-images', 'blog-images', true)
+--   on conflict (id) do nothing;
+--
+--   create policy "Public can read blog images"
+--     on storage.objects for select
+--     using (bucket_id = 'blog-images');
+--
+--   create policy "Admins can upload blog images"
+--     on storage.objects for insert
+--     to authenticated
+--     with check (bucket_id = 'blog-images');
+--
+--   create policy "Admins can delete blog images"
+--     on storage.objects for delete
+--     to authenticated
+--     using (bucket_id = 'blog-images');
