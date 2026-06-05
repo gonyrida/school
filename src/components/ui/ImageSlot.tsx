@@ -1,4 +1,4 @@
-import { ImageIcon } from "lucide-react";
+import { Image } from "lucide-react";
 
 type Props = {
   className?: string;
@@ -36,7 +36,7 @@ export function ImageSlot({
       aria-label={alt || "Image placeholder"}
     >
       {showIcon && (
-        <ImageIcon className="h-8 w-8 text-ink-300" strokeWidth={1.25} />
+        <Image className="h-8 w-8 text-ink-300" strokeWidth={1.25} />
       )}
     </div>
   );

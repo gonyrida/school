@@ -12,7 +12,7 @@ import {
   Heading1, 
   Heading2, 
   Quote,
-  ImageIcon,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface BlogEditorProps {

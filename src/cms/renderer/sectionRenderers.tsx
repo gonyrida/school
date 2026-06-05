@@ -22,12 +22,18 @@ import type {
   ContactInfoSectionSchema,
   ContactFormSectionSchema,
   MapSectionSchema,
+  FeesTuitionSectionSchema,
+  LeadershipSectionSchema,
   Background,
   CardItem,
 } from '@/cms/schema/sections';
 import { z } from 'zod';
 import { cms } from '@/cms/api';
 import type { EventPost } from '@/cms/api';
+import { FeesTuitionSection } from '@/components/sections/FeesTuitionSection';
+import { LeadershipSection } from '@/components/sections/LeadershipSection';
+import { useFees } from '@/hooks/useFees';
+import { useLeaders } from '@/hooks/useLeaders';
 
 type Hero = z.infer<typeof HeroSectionSchema>;
 type Banner = z.infer<typeof BannerSectionSchema>;
@@ -1614,6 +1620,75 @@ export function MapRenderer({ data }: { data: MapSection }) {
             <div className="h-full w-full bg-surface-soft flex items-center justify-center text-ink-500 text-sm">
               Add a map embed URL in the editor
             </div>
+          )}
+        </div>
+      </section>
+    </SectionBg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fees & Tuition — CMS section wrapper
+// ─────────────────────────────────────────────────────────────────────────────
+
+type FeesTuition = z.infer<typeof FeesTuitionSectionSchema>;
+
+export function FeesTuitionRenderer({ data }: { data: FeesTuition }) {
+  const { fees } = useFees();
+  return (
+    <SectionBg background={data.background}>
+      <section className="py-16 sm:py-24">
+        <div className="container-page">
+          <div className="text-center mb-12">
+            {data.eyebrow && <p className="eyebrow mb-3">{data.eyebrow}</p>}
+            {data.title && <h2 className="section-title mb-4">{data.title}</h2>}
+            {data.description && (
+              <p className="text-sm text-ink-500 max-w-xl mx-auto leading-relaxed">
+                {data.description}
+              </p>
+            )}
+          </div>
+          <FeesTuitionSection fees={fees} hideHeader />
+          {data.showNote && (
+            <p className="text-center text-xs text-ink-400 mt-8">
+              * Fees are subject to change. Contact our admissions office for the most up-to-date information.
+            </p>
+          )}
+        </div>
+      </section>
+    </SectionBg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Leadership — CMS section wrapper
+// ─────────────────────────────────────────────────────────────────────────────
+
+type Leadership = z.infer<typeof LeadershipSectionSchema>;
+
+export function LeadershipRenderer({ data }: { data: Leadership }) {
+  const { leaders, loading } = useLeaders();
+  return (
+    <SectionBg background={data.background}>
+      <section className="py-16 sm:py-24 bg-surface-muted">
+        <div className="container-page">
+          <div className="text-center mb-14">
+            {data.eyebrow && <p className="eyebrow mb-3">{data.eyebrow}</p>}
+            {data.title && <h2 className="section-title mb-4">{data.title}</h2>}
+            {data.description && (
+              <p className="text-sm text-ink-500 max-w-xl mx-auto leading-relaxed">
+                {data.description}
+              </p>
+            )}
+          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-64 rounded-3xl bg-surface-soft animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <LeadershipSection leaders={leaders} hideHeader />
           )}
         </div>
       </section>

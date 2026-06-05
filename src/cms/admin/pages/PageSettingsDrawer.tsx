@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ImageIcon } from 'lucide-react';
+import { X, Image as ImageIcon } from 'lucide-react';
 import { usePageEditor } from '@/cms/store/pageEditor';
 import { MediaPicker } from '@/cms/admin/components/MediaPicker';
 

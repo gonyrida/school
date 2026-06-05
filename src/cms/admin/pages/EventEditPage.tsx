@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, Trash2, ImageIcon, X, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Image as ImageIcon, X, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cms } from '@/cms/api';
 import type { EventPost } from '@/cms/api';

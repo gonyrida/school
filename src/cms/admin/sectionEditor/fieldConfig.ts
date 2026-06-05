@@ -917,4 +917,58 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
     },
     APPEARANCE_GROUP,
   ],
+
+  fees_tuition: [
+    {
+      title: 'Section Header',
+      fields: [
+        { type: 'text', path: 'eyebrow', label: 'Eyebrow', placeholder: 'Transparent Pricing' },
+        { type: 'text', path: 'title', label: 'Title', placeholder: 'Fees & Tuition' },
+        { type: 'textarea', path: 'description', label: 'Description' },
+        {
+          type: 'toggle',
+          path: 'showNote',
+          label: 'Show disclaimer note',
+          description: 'Shows "* Fees are subject to change" note below cards',
+        },
+      ],
+    },
+    {
+      title: 'Manage Fee Cards',
+      fields: [
+        {
+          type: 'text',
+          path: '_info',
+          label: 'ℹ️ Fee cards are managed separately',
+          description: 'Go to Dashboard → Fees & Tuition to add, edit, or reorder fee cards.',
+          placeholder: '',
+        },
+      ],
+    },
+    APPEARANCE_GROUP,
+  ],
+
+  leadership: [
+    {
+      title: 'Section Header',
+      fields: [
+        { type: 'text', path: 'eyebrow', label: 'Eyebrow', placeholder: 'Our People' },
+        { type: 'text', path: 'title', label: 'Title', placeholder: 'Leadership Team' },
+        { type: 'textarea', path: 'description', label: 'Description' },
+      ],
+    },
+    {
+      title: 'Manage Leaders',
+      fields: [
+        {
+          type: 'text',
+          path: '_info',
+          label: 'ℹ️ Leaders are managed separately',
+          description: 'Go to Dashboard → Leadership to add, edit, reorder, or upload photos.',
+          placeholder: '',
+        },
+      ],
+    },
+    APPEARANCE_GROUP,
+  ],
 };

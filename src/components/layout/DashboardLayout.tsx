@@ -8,9 +8,10 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, FileText, Calendar, ImageIcon,
+  LayoutDashboard, FileText, Calendar, Image,
   UserCog, Settings, Search, Menu, X,
   LogOut, ChevronLeft, ChevronRight, User, BookOpen,
+  Users, DollarSign,
 } from 'lucide-react';
 import { SchoolLogo } from '@/components/ui/SchoolLogo';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,7 +36,14 @@ const NAV_GROUPS = [
       { to: '/dashboard/pages',  label: 'Pages',         icon: FileText   },
       { to: '/dashboard/events', label: 'News & Events', icon: Calendar   },
       { to: '/dashboard/blog',   label: 'Blog',          icon: BookOpen   },
-      { to: '/dashboard/media',  label: 'Media Library', icon: ImageIcon  },
+      { to: '/dashboard/media',  label: 'Media Library', icon: Image      },
+    ],
+  },
+  {
+    title: 'School',
+    items: [
+      { to: '/dashboard/leaders', label: 'Leadership',  icon: Users      },
+      { to: '/dashboard/fees',    label: 'Fees & Tuition', icon: DollarSign },
     ],
   },
   {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImageIcon, Plus, Trash2, GripVertical, ExternalLink } from 'lucide-react';
+import { Image as ImageIcon, Plus, Trash2, GripVertical, ExternalLink } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
 import {
@@ -308,8 +308,20 @@ function ImageFieldComponent({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Icon field — accepts a lucide icon name with live preview
+// Icon field — accepts a lucide icon name with live preview + searchable picker
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Build a searchable list of all valid PascalCase icon names from the package.
+// Filter to only the "base" names (not the LucideXxx or XxxIcon aliases).
+const ALL_ICON_NAMES: string[] = Object.keys(Icons).filter((key) => {
+  if (typeof (Icons as Record<string, unknown>)[key] !== 'function' && typeof (Icons as Record<string, unknown>)[key] !== 'object') return false;
+  // Keep only PascalCase base names — skip Lucide-prefixed and Icon-suffixed aliases
+  if (key.startsWith('Lucide')) return false;
+  if (key.endsWith('Icon') && key !== 'Icon') return false;
+  // Must start with uppercase
+  if (!/^[A-Z]/.test(key)) return false;
+  return true;
+}).sort();
 
 function IconFieldComponent({
   field,
@@ -320,14 +332,28 @@ function IconFieldComponent({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Icon = value ? (Icons as any)[value] : null;
   const valid = Boolean(Icon);
 
+  const filtered = search.length >= 2
+    ? ALL_ICON_NAMES.filter((n) => n.toLowerCase().includes(search.toLowerCase())).slice(0, 40)
+    : [];
+
+  const selectIcon = (name: string) => {
+    onChange(name);
+    setOpen(false);
+    setSearch('');
+  };
+
   return (
-    <div>
+    <div className="relative">
       <Label field={field} />
       <div className="flex gap-2">
+        {/* Preview box */}
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${
             valid
@@ -337,27 +363,72 @@ function IconFieldComponent({
         >
           {Icon ? <Icon className="h-5 w-5" /> : <span className="text-xs">?</span>}
         </div>
+        {/* Type-to-search input */}
         <input
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="GraduationCap"
+          value={open ? search : value}
+          onFocus={() => { setOpen(true); setSearch(value); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            if (!open) setOpen(true);
+          }}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder="GraduationCap, BookOpen…"
           className="input-field flex-1 font-mono text-sm"
         />
+        {/* Browse link */}
         <a
           href="https://lucide.dev/icons/"
           target="_blank"
           rel="noreferrer"
-          title="Browse icons"
+          title="Browse all icons at lucide.dev — use PascalCase names (e.g. GraduationCap not graduation-cap)"
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-ink-300/30 text-ink-500 hover:border-brand-700 hover:text-brand-700"
         >
           <ExternalLink className="h-4 w-4" />
         </a>
       </div>
+
+      {/* Hint */}
       {value && !valid && (
         <p className="mt-1 text-xs text-amber-600">
-          "{value}" isn't a valid lucide icon name. Browse at lucide.dev/icons.
+          "{value}" not found. Use PascalCase: <strong>GraduationCap</strong> not graduation-cap.
+          Search below or browse lucide.dev/icons.
         </p>
+      )}
+      {!value && (
+        <p className="mt-1 text-xs text-ink-400">
+          Type a PascalCase name (e.g. <code>BookOpen</code>, <code>GraduationCap</code>) or search above.
+        </p>
+      )}
+
+      {/* Dropdown autocomplete */}
+      {open && filtered.length > 0 && (
+        <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-ink-300/20 rounded-xl shadow-lg max-h-56 overflow-y-auto">
+          <div className="grid grid-cols-4 gap-1 p-2">
+            {filtered.map((name) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const I = (Icons as any)[name];
+              return (
+                <button
+                  key={name}
+                  onMouseDown={() => selectIcon(name)}
+                  title={name}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-lg text-center hover:bg-brand-50 hover:text-brand-700 transition-colors ${
+                    value === name ? 'bg-brand-50 text-brand-700' : 'text-ink-600'
+                  }`}
+                >
+                  <I className="h-5 w-5 shrink-0" />
+                  <span className="text-[9px] leading-tight truncate w-full">{name}</span>
+                </button>
+              );
+            })}
+          </div>
+          {filtered.length === 40 && (
+            <p className="text-center text-xs text-ink-400 py-1.5 border-t border-ink-300/10">
+              Showing first 40 — type more to narrow
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

@@ -36,6 +36,8 @@ const ALL_SECTIONS: SectionType[] = [
   'contact_info',
   'contact_form',
   'map',
+  'fees_tuition',
+  'leadership',
 ];
 
 export const PAGE_REGISTRY: PageDefinition[] = [
@@ -89,9 +91,9 @@ export const PAGE_REGISTRY: PageDefinition[] = [
     title: 'About — Leader',
     route: '/about/leader',
     description: 'Principal message, leadership team, and staff',
-    allowedSections: ['hero', 'principal_message', 'cards', 'rich_text'],
+    allowedSections: ['hero', 'principal_message', 'leadership', 'cards', 'rich_text', 'gallery'],
     defaultSections: [
-      { type: 'hero', data: { title: 'Meet Our Leader', size: 'compact' } },
+      { type: 'hero', data: { title: 'Meet Our Leaders', size: 'compact' } },
       {
         type: 'principal_message',
         data: {
@@ -100,6 +102,7 @@ export const PAGE_REGISTRY: PageDefinition[] = [
           message: '<p>Welcome to our school community…</p>',
         },
       },
+      { type: 'leadership', data: {} },
     ],
   },
   {
@@ -146,18 +149,35 @@ export const PAGE_REGISTRY: PageDefinition[] = [
     key: 'admissions',
     title: 'Admissions',
     route: '/admissions',
-    description: 'Application process and requirements',
+    description: 'Application process, requirements, fees, and FAQ',
     allowedSections: 'all',
     defaultSections: [
-      { type: 'hero', data: { title: 'Admissions', size: 'compact' } },
+      { type: 'hero', data: { title: 'Begin Your Journey With Us', subtitle: 'Everything you need to know about joining Norol Iman Islamic School.', size: 'compact' } },
       {
         type: 'timeline',
         data: {
-          title: 'How to Apply',
+          title: 'Admission Step By Step',
+          layout: 'zigzag',
           steps: [
-            { id: '1', title: 'Submit Application', description: 'Complete the online form' },
-            { id: '2', title: 'Document Review', description: 'We review your documents' },
-            { id: '3', title: 'Interview', description: 'Meet our admissions team' },
+            { id: '1', title: 'Inquiry', description: 'Contact our admissions office or fill out an inquiry form online.' },
+            { id: '2', title: 'Campus Visit', description: 'Schedule a visit to see our facilities and meet our team.' },
+            { id: '3', title: 'Application', description: 'Submit the completed application form with required documents.' },
+            { id: '4', title: 'Assessment', description: 'Student completes a brief academic and language assessment.' },
+            { id: '5', title: 'Interview', description: 'Family interview with our admissions coordinator.' },
+            { id: '6', title: 'Enrollment', description: 'Receive offer letter and complete enrollment formalities.' },
+          ],
+        },
+      },
+      { type: 'fees_tuition', data: {} },
+      {
+        type: 'faq',
+        data: {
+          title: 'Frequently Asked Questions',
+          items: [
+            { id: '1', question: 'What documents are required for admission?', answer: 'Birth certificate, previous school records, passport photo, and a completed application form.' },
+            { id: '2', question: 'What is the application timeline?', answer: 'Applications open in October and close in December for the following academic year.' },
+            { id: '3', question: 'Do you offer scholarships?', answer: 'Yes, we offer merit-based scholarships. Contact our admissions office for details.' },
+            { id: '4', question: 'What languages are taught?', answer: 'Khmer, Arabic, and English are taught across the curriculum.' },
           ],
         },
       },

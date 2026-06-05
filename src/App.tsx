@@ -49,6 +49,10 @@ import AdminBlogListPage from '@/pages/admin/blog/AdminBlogListPage';
 import AdminBlogCreatePage from '@/pages/admin/blog/AdminBlogCreatePage';
 import AdminBlogEditPage from '@/pages/admin/blog/AdminBlogEditPage';
 
+// Admin leaders & fees
+import AdminLeadersPage from '@/pages/admin/leaders/AdminLeadersPage';
+import AdminFeesPage from '@/pages/admin/fees/AdminFeesPage';
+
 function NotFoundPage() {
   return (
     <div className="container-page py-32 text-center">
@@ -119,6 +123,10 @@ export default function App() {
             <Route path="blog" element={<AdminBlogListPage />} />
             <Route path="blog/new" element={<AdminBlogCreatePage />} />
             <Route path="blog/edit/:id" element={<AdminBlogEditPage />} />
+
+            {/* Leaders & Fees management */}
+            <Route path="leaders" element={<AdminLeadersPage />} />
+            <Route path="fees" element={<AdminFeesPage />} />
 
             {/* ✅ FIX 5: Real user management */}
             <Route path="users" element={<UserManagementPage />} />

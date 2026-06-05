@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ExternalLink, FileEdit, Calendar } from 'lucide-react';
+import { Search, ExternalLink, FilePenLine, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cms } from '@/cms/api';
 import type { Page } from '@/cms/schema/sections';
@@ -133,7 +133,7 @@ export default function PagesListPage() {
                         to={`/dashboard/pages/${encodeURIComponent(p.key)}`}
                         className="rounded-lg bg-brand-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-800"
                       >
-                        <FileEdit className="mr-1 inline h-3 w-3" /> Edit
+                        <FilePenLine className="mr-1 inline h-3 w-3" /> Edit
                       </Link>
                     </div>
                   </td>

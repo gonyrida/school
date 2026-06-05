@@ -242,6 +242,23 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         background: noBg,
       } as SectionData<T>;
 
+    case 'fees_tuition':
+      return {
+        eyebrow: 'Transparent Pricing',
+        title: 'Fees & Tuition',
+        description: 'We believe in transparent pricing. All fees are clearly outlined to help families plan and make informed decisions.',
+        showNote: true,
+        background: noBg,
+      } as SectionData<T>;
+
+    case 'leadership':
+      return {
+        eyebrow: 'Our People',
+        title: 'Leadership Team',
+        description: 'Our dedicated leaders bring together decades of experience in education, administration, and community service.',
+        background: noBg,
+      } as SectionData<T>;
+
     default: {
       const _exhaustive: never = type;
       void _exhaustive;

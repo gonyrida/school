@@ -351,6 +351,32 @@ export const MapSectionSchema = z.object({
   background: BackgroundSchema,
 });
 
+/**
+ * FeesTuitionSection — displays fee cards pulled from the `fee_items` Supabase
+ * table (or static fallback). Admin controls the section header copy only;
+ * the cards themselves are managed via /dashboard/fees.
+ */
+export const FeesTuitionSectionSchema = z.object({
+  eyebrow: z.string().default('Transparent Pricing'),
+  title: z.string().default('Fees & Tuition'),
+  description: z.string().default('We believe in transparent pricing. All fees are clearly outlined to help families plan and make informed decisions.'),
+  showNote: z.boolean().default(true),
+  background: BackgroundSchema,
+});
+
+/**
+ * LeadershipSection — displays leadership cards pulled from the `leaders`
+ * Supabase table (or static fallback). The first row shows 3 cards with the
+ * center one elevated. Admin controls the section header copy only; the
+ * leaders themselves are managed via /dashboard/leaders.
+ */
+export const LeadershipSectionSchema = z.object({
+  eyebrow: z.string().default('Our People'),
+  title: z.string().default('Leadership Team'),
+  description: z.string().default('Our dedicated leaders bring together decades of experience in education, administration, and community service.'),
+  background: BackgroundSchema,
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Section type registry
 // ─────────────────────────────────────────────────────────────────────────────
@@ -373,6 +399,8 @@ export const SECTION_TYPES = [
   'contact_info',
   'contact_form',
   'map',
+  'fees_tuition',
+  'leadership',
 ] as const;
 
 export type SectionType = (typeof SECTION_TYPES)[number];
@@ -395,6 +423,8 @@ export const SECTION_SCHEMAS = {
   contact_info: ContactInfoSectionSchema,
   contact_form: ContactFormSectionSchema,
   map: MapSectionSchema,
+  fees_tuition: FeesTuitionSectionSchema,
+  leadership: LeadershipSectionSchema,
 } as const;
 
 export type SectionData<T extends SectionType = SectionType> = z.infer<
@@ -507,6 +537,18 @@ export const SECTION_META: Record<
     description: 'Embedded map (Google Maps or any iframe URL)',
     icon: 'Map',
     category: 'Contact',
+  },
+  fees_tuition: {
+    label: 'Fees & Tuition',
+    description: 'Fee cards (School, Dormitory, Tuition) — managed in /dashboard/fees',
+    icon: 'DollarSign',
+    category: 'School',
+  },
+  leadership: {
+    label: 'Leadership Team',
+    description: 'Leader cards with elevated center — managed in /dashboard/leaders',
+    icon: 'Users',
+    category: 'School',
   },
 };
 

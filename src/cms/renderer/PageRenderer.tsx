@@ -21,6 +21,8 @@ import {
   ContactInfoRenderer,
   ContactFormRenderer,
   MapRenderer,
+  FeesTuitionRenderer,
+  LeadershipRenderer,
 } from './sectionRenderers';
 
 /**
@@ -50,6 +52,8 @@ export const SECTION_COMPONENTS: Record<SectionType, ComponentType<{ data: any }
   contact_info: ContactInfoRenderer,
   contact_form: ContactFormRenderer,
   map: MapRenderer,
+  fees_tuition: FeesTuitionRenderer,
+  leadership: LeadershipRenderer,
 };
 
 interface SectionRendererProps {
