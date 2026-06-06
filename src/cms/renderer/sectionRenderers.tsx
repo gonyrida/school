@@ -399,9 +399,12 @@ const cardLayoutClass = (layout: Cards['layout']) => {
     case 'grid-4':
       return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
     case 'list':
-      return 'grid-cols-1';
+      return 'grid-cols-1 max-w-3xl mx-auto gap-3';
   }
 };
+
+// In list layout, cards render as compact horizontal rows
+const isListLayout = (layout: Cards['layout']) => layout === 'list';
 
 const shapeClass = (shape: 'square' | 'rounded' | 'circle') =>
   shape === 'square' ? 'rounded-none' : shape === 'circle' ? 'rounded-full' : 'rounded-2xl';
@@ -549,23 +552,24 @@ function cardBgFor(bg: CardItem['cardBackground']): {
   className: string;
   style?: React.CSSProperties;
 } {
-  if (!bg || bg.type === 'inherit') return { className: 'card' };
+  const base = 'rounded-2xl border border-ink-300/10 shadow-soft h-full';
+  if (!bg || bg.type === 'inherit') return { className: 'card h-full' };
   switch (bg.type) {
     case 'none':
-      return { className: 'rounded-2xl' };
+      return { className: 'rounded-2xl h-full' };
     case 'white':
-      return { className: 'rounded-2xl bg-white shadow-soft' };
+      return { className: `${base} bg-white` };
     case 'soft':
-      return { className: 'rounded-2xl bg-surface-soft' };
+      return { className: `${base} bg-surface-soft` };
     case 'muted':
-      return { className: 'rounded-2xl bg-surface-muted' };
+      return { className: `${base} bg-surface-muted` };
     case 'brand':
-      return { className: 'rounded-2xl bg-brand-700 text-white' };
+      return { className: 'rounded-2xl bg-brand-700 text-white shadow-glow h-full' };
     case 'dark':
-      return { className: 'rounded-2xl bg-ink-900 text-white' };
+      return { className: 'rounded-2xl bg-ink-900 text-white shadow-soft h-full' };
     case 'color':
       return {
-        className: 'rounded-2xl',
+        className: base,
         style: { backgroundColor: bg.color || 'transparent' },
       };
   }
@@ -590,19 +594,74 @@ function CardButton({
   );
 }
 
+// Map section-level defaultCardBackground to a CardBackground object
+function resolveCardBg(
+  cardBg: CardItem['cardBackground'],
+  sectionDefault?: Cards['defaultCardBackground'],
+): CardItem['cardBackground'] {
+  // If per-card is set to something other than inherit, use it
+  if (cardBg && cardBg.type !== 'inherit') return cardBg;
+  // Otherwise fall back to section default
+  if (sectionDefault && sectionDefault !== 'inherit') {
+    return { type: sectionDefault as CardItem['cardBackground']['type'], color: '' };
+  }
+  return cardBg ?? { type: 'inherit', color: '' };
+}
+
 function CardItemRenderer({
   card,
   defaultAlign,
+  defaultCardBackground,
+  listMode = false,
 }: {
   card: CardItem;
   defaultAlign: 'left' | 'center' | 'right';
+  defaultCardBackground?: Cards['defaultCardBackground'];
+  listMode?: boolean;
 }) {
   const align = resolveAlign(card.textAlign, defaultAlign);
   const visual = card.visual;
   const position = visual?.position ?? 'top';
   const isHorizontal = position === 'left' || position === 'right';
   const hasVisual = visual && visual.kind !== 'none';
-  const bg = cardBgFor(card.cardBackground);
+  const bg = cardBgFor(resolveCardBg(card.cardBackground, defaultCardBackground));
+
+  // List layout — compact horizontal row regardless of visual.position
+  if (listMode) {
+    return (
+      <div
+        className={`flex items-center gap-4 p-4 ${bg.className}`}
+        style={bg.style}
+      >
+        {hasVisual && (
+          <div className="shrink-0">
+            <CardVisual visual={{ ...visual, size: Math.min(visual.size ?? 40, 40) }} />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          {card.title && (
+            <h3 className="font-display font-semibold text-base text-ink-900 leading-snug">
+              {card.title}
+            </h3>
+          )}
+          <CardDescription card={card} align={align} />
+        </div>
+        <div className="shrink-0 flex items-center gap-2">
+          {card.button?.label && (
+            <CardButton button={card.button} align="left" />
+          )}
+          {card.href && !card.button?.label && (
+            <Link
+              to={card.href}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:gap-2 transition-all"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // Vertical (icon-on-top) layout
   if (!isHorizontal) {
@@ -651,9 +710,9 @@ function CardItemRenderer({
 
   // Horizontal (icon-beside-text) layout
   return (
-    <div className={`p-6 ${bg.className}`} style={bg.style}>
+    <div className={`h-full p-6 ${bg.className}`} style={bg.style}>
       <div
-        className={`flex items-start gap-4 ${
+        className={`flex h-full items-start gap-4 ${
           position === 'right' ? 'flex-row-reverse' : ''
         }`}
       >
@@ -678,6 +737,16 @@ function CardItemRenderer({
   );
 }
 
+// Resolve hover class from section-level setting
+const cardHoverClass = (hover: Cards['cardHover']) => {
+  switch (hover) {
+    case 'lift': return 'hover:-translate-y-1 transition-transform duration-200';
+    case 'glow': return 'hover:shadow-glow transition-shadow duration-200';
+    case 'lift-glow': return 'hover:-translate-y-1 hover:shadow-glow transition-all duration-200';
+    default: return '';
+  }
+};
+
 export function CardsRenderer({ data }: { data: Cards }) {
   if (data.cards.length === 0) {
     return (
@@ -689,6 +758,10 @@ export function CardsRenderer({ data }: { data: Cards }) {
       </SectionBg>
     );
   }
+
+  const hoverClass = cardHoverClass(data.cardHover ?? 'lift');
+  const listMode = isListLayout(data.layout);
+  const equalH = data.equalHeight !== false; // default true
 
   return (
     <SectionBg background={data.background}>
@@ -704,7 +777,10 @@ export function CardsRenderer({ data }: { data: Cards }) {
             {data.description && <p className="mt-3 text-ink-500">{data.description}</p>}
           </motion.div>
         )}
-        <div className={`grid gap-6 ${cardLayoutClass(data.layout)}`}>
+        <div
+          key={data.layout}
+          className={`grid gap-6 ${cardLayoutClass(data.layout)} ${equalH && !listMode ? 'items-stretch' : ''}`}
+        >
           {data.cards.map((card, i) => {
             // Handle lastCardPosition for 2-column layouts with odd count
             const isLastOdd =
@@ -716,7 +792,7 @@ export function CardsRenderer({ data }: { data: Cards }) {
                 ? 'md:col-span-2 md:max-w-md md:mx-auto'
                 : data.lastCardPosition === 'right'
                   ? 'md:col-start-2'
-                  : '' // 'left' is the default position
+                  : ''
               : '';
             return (
               <motion.div
@@ -725,9 +801,14 @@ export function CardsRenderer({ data }: { data: Cards }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.05 }}
-                className={lastClass}
+                className={`${equalH && !listMode ? 'h-full' : ''} ${hoverClass}${lastClass ? ' ' + lastClass : ''}`}
               >
-                <CardItemRenderer card={card} defaultAlign={data.defaultTextAlign} />
+                <CardItemRenderer
+                  card={card}
+                  defaultAlign={data.defaultTextAlign}
+                  defaultCardBackground={data.defaultCardBackground}
+                  listMode={listMode}
+                />
               </motion.div>
             );
           })}

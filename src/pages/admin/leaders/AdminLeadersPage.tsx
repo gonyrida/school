@@ -73,15 +73,34 @@ function LeaderFormModal({
     return Object.keys(e).length === 0;
   };
 
+  const [previewUrl, setPreviewUrl] = useState<string>(leader?.image_url ?? "");
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image is too large. Please choose a file under 5MB.");
+      return;
+    }
+
+    // Show instant local preview while uploading
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
     setUploading(true);
+
     try {
       const url = await uploadImage(file, leader?.id ?? `temp-${Date.now()}`);
       setForm((f) => ({ ...f, image_url: url }));
-    } catch {
-      alert("Image upload failed. Please try again.");
+      setPreviewUrl(url);
+      // Revoke the temporary blob URL
+      URL.revokeObjectURL(localPreview);
+    } catch (err) {
+      console.error("Upload error:", err);
+      setPreviewUrl(form.image_url ?? ''); // revert preview
+      URL.revokeObjectURL(localPreview);
+      alert("Image upload failed. If you haven't set up Supabase storage yet, the image will be saved as a data URL for demo purposes. Check the console for details.");
     } finally {
       setUploading(false);
     }
@@ -154,8 +173,8 @@ function LeaderFormModal({
           {/* Profile image */}
           <div className="flex items-center gap-5">
             <div className="w-20 h-20 rounded-2xl overflow-hidden bg-surface-muted flex-shrink-0">
-              {form.image_url ? (
-                <img src={form.image_url} alt="" className="w-full h-full object-cover" />
+              {previewUrl ? (
+                <img src={previewUrl} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <User className="h-8 w-8 text-ink-300" />

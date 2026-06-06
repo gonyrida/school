@@ -87,6 +87,9 @@ export function getDefaultSectionData<T extends SectionType>(type: T): SectionDa
         layout: 'grid-3',
         lastCardPosition: 'left',
         defaultTextAlign: 'center',
+        defaultCardBackground: 'inherit',
+        cardHover: 'lift',
+        equalHeight: true,
         cards: [makeCard('Card one'), makeCard('Card two'), makeCard('Card three')],
         background: noBg,
       } as SectionData<T>;

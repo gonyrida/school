@@ -505,6 +505,38 @@ export const SECTION_FIELDS: Record<SectionType, FieldGroup[]> = {
             { value: 'right', label: 'Right' },
           ],
         },
+        {
+          type: 'select',
+          path: 'defaultCardBackground',
+          label: 'Default card background',
+          description: 'Applied to all cards unless overridden per-card',
+          options: [
+            { value: 'inherit', label: 'Default (white card)' },
+            { value: 'none', label: 'None (transparent)' },
+            { value: 'white', label: 'White' },
+            { value: 'soft', label: 'Soft' },
+            { value: 'muted', label: 'Muted' },
+            { value: 'brand', label: 'Brand (dark blue)' },
+            { value: 'dark', label: 'Dark' },
+          ],
+        },
+        {
+          type: 'select',
+          path: 'cardHover',
+          label: 'Card hover effect',
+          options: [
+            { value: 'none', label: 'None' },
+            { value: 'lift', label: 'Lift (move up)' },
+            { value: 'glow', label: 'Glow (shadow)' },
+            { value: 'lift-glow', label: 'Lift + Glow' },
+          ],
+        },
+        {
+          type: 'toggle',
+          path: 'equalHeight',
+          label: 'Equal height cards',
+          description: 'All cards in each row stretch to the same height',
+        },
       ],
     },
     {

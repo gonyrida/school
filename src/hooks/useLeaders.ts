@@ -130,19 +130,25 @@ export function useLeaders() {
 
   const uploadImage = useCallback(async (file: File, leaderId: string): Promise<string> => {
     if (!isSupabaseConfigured) {
-      return URL.createObjectURL(file);
+      // Convert to base64 data URL so it persists across re-renders in demo mode
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        reader.readAsDataURL(file);
+      });
     }
 
     const ext = file.name.split(".").pop();
     const path = `leaders/${leaderId}-${Date.now()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("images")
+      .from("media")
       .upload(path, file, { upsert: true });
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from("images").getPublicUrl(path);
+    const { data } = supabase.storage.from("media").getPublicUrl(path);
     return data.publicUrl;
   }, []);
 

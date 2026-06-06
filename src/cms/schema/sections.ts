@@ -166,6 +166,14 @@ export const CardsSectionSchema = z.object({
   lastCardPosition: z.enum(['left', 'center', 'right']).default('left'),
   // Default text alignment for all cards (each card can override)
   defaultTextAlign: z.enum(['left', 'center', 'right']).default('left'),
+  // Default background for ALL cards (individual cards can still override)
+  defaultCardBackground: z
+    .enum(['inherit', 'none', 'white', 'soft', 'muted', 'brand', 'dark'])
+    .default('inherit'),
+  // Hover effect for cards
+  cardHover: z.enum(['none', 'lift', 'glow', 'lift-glow']).default('lift'),
+  // Equal-height cards in grid rows
+  equalHeight: z.boolean().default(true),
   cards: z.array(CardItemSchema),
   background: BackgroundSchema,
 });
